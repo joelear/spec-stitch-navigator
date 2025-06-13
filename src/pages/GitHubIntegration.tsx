@@ -24,8 +24,16 @@ export default function GitHubIntegration() {
   useEffect(() => {
     // Handle OAuth callback
     const code = searchParams.get('code');
-    console.log('useEffect triggered, code:', code);
-    console.log('searchParams:', Object.fromEntries(searchParams));
+    const fullUrl = window.location.href;
+    const allParams = Object.fromEntries(searchParams);
+    
+    console.log('=== GitHub OAuth Debug ===');
+    console.log('Full URL:', fullUrl);
+    console.log('Current path:', window.location.pathname);
+    console.log('Search string:', window.location.search);
+    console.log('All search params:', allParams);
+    console.log('Code parameter:', code);
+    console.log('========================');
     
     if (code) {
       console.log('Code found, calling handleOAuthCallback');
