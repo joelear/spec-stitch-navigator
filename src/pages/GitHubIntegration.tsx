@@ -47,48 +47,103 @@ export default function GitHubIntegration() {
   const handleOAuthCallback = async (code: string) => {
     setIsConnecting(true);
     try {
-      console.log('Starting OAuth callback with code:', code);
+      console.log('=== FRONTEND OAUTH DEBUG ===');
+      console.log('1. Starting OAuth callback with code:', !!code, code.substring(0, 10) + '...');
       
-      // Get the current session to ensure we have auth headers
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current session:', session);
+      // Get the current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('2. Session check:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        hasAccessToken: !!session?.access_token,
+        userId: session?.user?.id,
+        sessionError: sessionError?.message
+      });
       
       if (!session) {
         throw new Error('No authenticated session found');
       }
 
-      console.log('Calling github-auth function with headers:', {
-        Authorization: `Bearer ${session.access_token?.substring(0, 20)}...`
+      console.log('3. Making request to github-auth function...');
+      
+      const requestData = { code };
+      const requestHeaders = {
+        Authorization: `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json'
+      };
+
+      console.log('4. Request details:', {
+        hasCode: !!requestData.code,
+        hasAuthHeader: !!requestHeaders.Authorization,
+        authTokenPreview: requestHeaders.Authorization.substring(0, 20) + '...'
       });
 
       const { data, error } = await supabase.functions.invoke('github-auth', {
-        body: { code },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
+        body: requestData,
+        headers: requestHeaders
       });
 
-      console.log('Edge function response:', { data, error });
+      console.log('5. Function response:', {
+        hasData: !!data,
+        hasError: !!error,
+        data,
+        error
+      });
 
       if (error) {
-        throw new Error(error.message || 'Edge function call failed');
+        console.error('6. Function invocation error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw new Error(`Function error: ${error.message}`);
       }
 
       if (data?.success) {
+        console.log('7. Success! Verifying database update...');
+        
+        // Verify the data was saved
+        const { data: profileCheck, error: profileError } = await supabase
+          .from('profiles')
+          .select('github_username, github_access_token, github_connected_at')
+          .eq('user_id', session.user.id)
+          .single();
+        
+        console.log('8. Database verification:', {
+          profileExists: !!profileCheck,
+          hasUsername: !!profileCheck?.github_username,
+          hasToken: !!profileCheck?.github_access_token,
+          hasConnectedAt: !!profileCheck?.github_connected_at,
+          username: profileCheck?.github_username,
+          profileError: profileError?.message
+        });
+
+        if (!profileCheck?.github_username) {
+          throw new Error('Data not saved to database - check edge function logs');
+        }
+
         toast({
           title: "GitHub Connected!",
           description: `Successfully connected as @${data.username}`,
         });
+        
         setIsConnected(true);
         setGithubUsername(data.username);
         loadConnectedRepos();
+        
         // Clear the URL parameters
         window.history.replaceState({}, '', '/integrations/github');
       } else {
+        console.error('9. Function returned failure:', data);
         throw new Error(data?.error || 'Unknown error occurred');
       }
     } catch (error) {
-      console.error('OAuth callback error:', error);
+      console.error('=== FRONTEND OAUTH ERROR ===');
+      console.error('Error type:', typeof error);
+      console.error('Error message:', error instanceof Error ? error.message : error);
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+      
       toast({
         title: "Connection Failed",
         description: error instanceof Error ? error.message : "Failed to connect GitHub account",
