@@ -24,9 +24,14 @@ export default function GitHubIntegration() {
   useEffect(() => {
     // Handle OAuth callback
     const code = searchParams.get('code');
+    console.log('useEffect triggered, code:', code);
+    console.log('searchParams:', Object.fromEntries(searchParams));
+    
     if (code) {
+      console.log('Code found, calling handleOAuthCallback');
       handleOAuthCallback(code);
     } else {
+      console.log('No code found, checking existing GitHub connection');
       checkGitHubConnection();
     }
   }, [searchParams]);
@@ -43,6 +48,10 @@ export default function GitHubIntegration() {
       if (!session) {
         throw new Error('No authenticated session found');
       }
+
+      console.log('Calling github-auth function with headers:', {
+        Authorization: `Bearer ${session.access_token?.substring(0, 20)}...`
+      });
 
       const { data, error } = await supabase.functions.invoke('github-auth', {
         body: { code },
@@ -82,16 +91,23 @@ export default function GitHubIntegration() {
   };
 
   const checkGitHubConnection = async () => {
+    console.log('Checking GitHub connection...');
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .select('github_username, github_connected_at')
+        .select('github_username, github_connected_at, github_access_token')
         .single();
       
+      console.log('Profile data from database:', data);
+      console.log('Profile query error:', error);
+      
       if (data?.github_username) {
+        console.log('GitHub connection found, setting connected state');
         setIsConnected(true);
         setGithubUsername(data.github_username);
         loadConnectedRepos();
+      } else {
+        console.log('No GitHub connection found in database');
       }
     } catch (error) {
       console.error('Error checking GitHub connection:', error);
