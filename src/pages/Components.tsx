@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Grid3X3, Filter } from "lucide-react";
+import { Search, Grid3X3, Filter, Database } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const mockComponents = [
@@ -53,6 +53,7 @@ export default function Components() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [useDummyData, setUseDummyData] = useState(true);
   const navigate = useNavigate();
 
   const filteredComponents = mockComponents.filter(component => {
@@ -63,15 +64,65 @@ export default function Components() {
   });
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Components</h1>
-        <p className="text-muted-foreground">Catalog of reusable UI components</p>
+    <div className="flex h-full">
+      {/* Left Sidebar Filters */}
+      <div className="w-64 border-r bg-muted/30 p-4 space-y-6">
+        <div>
+          <h3 className="font-medium mb-3">Status</h3>
+          <div className="space-y-2">
+            {statusTypes.map(status => (
+              <Button
+                key={status}
+                variant={selectedStatus === status ? "default" : "ghost"}
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => setSelectedStatus(status)}
+              >
+                {status}
+              </Button>
+            ))}
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="font-medium mb-3">Type</h3>
+          <div className="space-y-2">
+            {componentTypes.map(type => (
+              <Button
+                key={type}
+                variant={selectedType === type ? "default" : "ghost"}
+                size="sm"
+                className="w-full justify-start"
+                onClick={() => setSelectedType(type)}
+              >
+                {type}
+              </Button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex-1 max-w-md">
+      {/* Main Content */}
+      <div className="flex-1 p-6">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Components</h1>
+            <p className="text-muted-foreground">Catalog of reusable UI components</p>
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setUseDummyData(!useDummyData)}
+            className="gap-2"
+          >
+            <Database className="w-4 h-4" />
+            {useDummyData ? "Using Dummy Data" : "Using Real Data"}
+          </Button>
+        </div>
+
+        {/* Search */}
+        <div className="mb-6 max-w-md">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -82,35 +133,6 @@ export default function Components() {
             />
           </div>
         </div>
-        
-        <div className="flex gap-2">
-          <div className="flex gap-1">
-            {componentTypes.map(type => (
-              <Button
-                key={type}
-                variant={selectedType === type ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedType(type)}
-              >
-                {type}
-              </Button>
-            ))}
-          </div>
-          
-          <div className="flex gap-1">
-            {statusTypes.map(status => (
-              <Button
-                key={status}
-                variant={selectedStatus === status ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedStatus(status)}
-              >
-                {status}
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Components Grid */}
       {filteredComponents.length === 0 ? (
@@ -167,7 +189,8 @@ export default function Components() {
             </Card>
           ))}
         </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
