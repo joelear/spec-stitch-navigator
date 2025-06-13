@@ -115,7 +115,7 @@ export default function GitHubIntegration() {
           .from('profiles')
           .select('github_username, github_access_token, github_connected_at')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
         
         console.log('8. Database verification:', {
           profileExists: !!profileCheck,
@@ -166,7 +166,7 @@ export default function GitHubIntegration() {
       const { data, error } = await supabase
         .from('profiles')
         .select('github_username, github_connected_at, github_access_token')
-        .single();
+        .maybeSingle();
       
       console.log('Profile data from database:', data);
       console.log('Profile query error:', error);

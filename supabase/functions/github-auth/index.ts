@@ -76,7 +76,21 @@ serve(async (req) => {
     }
 
     if (req.method === "POST") {
-      const { code } = await req.json();
+      // Parse request body more safely
+      let requestBody;
+      try {
+        const bodyText = await req.text();
+        console.log('Raw request body:', bodyText.length > 0 ? 'present' : 'empty');
+        if (!bodyText || bodyText.trim() === '') {
+          throw new Error('Request body is empty');
+        }
+        requestBody = JSON.parse(bodyText);
+      } catch (parseError) {
+        console.error('Failed to parse request body:', parseError.message);
+        throw new Error(`Invalid JSON in request body: ${parseError.message}`);
+      }
+
+      const { code } = requestBody;
       console.log('GitHub auth: Received code:', !!code, code ? `${code.substring(0, 10)}...` : 'null');
       console.log('GitHub auth: User ID:', user.id);
 
@@ -157,7 +171,7 @@ serve(async (req) => {
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
       
       console.log('GitHub auth: Existing profile check:', {
         profileExists: !!existingProfile,
