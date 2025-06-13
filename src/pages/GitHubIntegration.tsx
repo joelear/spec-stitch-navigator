@@ -34,9 +34,28 @@ export default function GitHubIntegration() {
   const handleOAuthCallback = async (code: string) => {
     setIsConnecting(true);
     try {
-      const { data } = await supabase.functions.invoke('github-auth', {
-        body: { code }
+      console.log('Starting OAuth callback with code:', code);
+      
+      // Get the current session to ensure we have auth headers
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session);
+      
+      if (!session) {
+        throw new Error('No authenticated session found');
+      }
+
+      const { data, error } = await supabase.functions.invoke('github-auth', {
+        body: { code },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
       });
+
+      console.log('Edge function response:', { data, error });
+
+      if (error) {
+        throw new Error(error.message || 'Edge function call failed');
+      }
 
       if (data?.success) {
         toast({
@@ -48,11 +67,14 @@ export default function GitHubIntegration() {
         loadConnectedRepos();
         // Clear the URL parameters
         window.history.replaceState({}, '', '/integrations/github');
+      } else {
+        throw new Error(data?.error || 'Unknown error occurred');
       }
     } catch (error) {
+      console.error('OAuth callback error:', error);
       toast({
         title: "Connection Failed",
-        description: "Failed to connect GitHub account",
+        description: error instanceof Error ? error.message : "Failed to connect GitHub account",
         variant: "destructive",
       });
     }
