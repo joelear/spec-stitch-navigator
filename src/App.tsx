@@ -26,7 +26,13 @@ const queryClient = new QueryClient();
 function AppContent() {
   const { user } = useAuth();
   
+  console.log('=== APP ROUTING DEBUG ===');
+  console.log('Current pathname:', window.location.pathname);
+  console.log('User authenticated:', !!user);
+  console.log('User loading state from AuthProvider');
+  
   if (user) {
+    console.log('User is authenticated, rendering main app routes');
     return (
       <SidebarProvider>
         <div className="min-h-screen flex w-full">
@@ -35,7 +41,12 @@ function AppContent() {
             <AppHeader />
             <main className="flex-1 overflow-auto">
               <Routes>
-                <Route path="/" element={<Integrations />} />
+                <Route path="/" element={
+                  (() => {
+                    console.log('Rendering Integrations page (root)');
+                    return <Integrations />;
+                  })()
+                } />
                 <Route path="/components" element={<Components />} />
                 <Route path="/components/:id" element={<ComponentDetail />} />
                 <Route path="/features" element={<Features />} />
@@ -44,7 +55,12 @@ function AppContent() {
                 <Route path="/integrations" element={<Integrations />} />
                 <Route path="/integrations/repos" element={<Repos />} />
                 <Route path="/integrations/repos/:id" element={<RepoDashboard />} />
-                <Route path="/integrations/github" element={<GitHubIntegration />} />
+                <Route path="/integrations/github" element={
+                  (() => {
+                    console.log('Rendering GitHubIntegration page');
+                    return <GitHubIntegration />;
+                  })()
+                } />
                 <Route path="/auth" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
