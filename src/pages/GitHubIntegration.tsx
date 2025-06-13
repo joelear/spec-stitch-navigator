@@ -82,11 +82,12 @@ export default function GitHubIntegration() {
       console.log('4. Request details:', {
         hasCode: !!requestData.code,
         hasAuthHeader: !!requestHeaders.Authorization,
-        authTokenPreview: requestHeaders.Authorization.substring(0, 20) + '...'
+        authTokenPreview: requestHeaders.Authorization.substring(0, 20) + '...',
+        requestBody: JSON.stringify(requestData)
       });
 
       const { data, error } = await supabase.functions.invoke('github-auth', {
-        body: requestData,
+        body: JSON.stringify(requestData),
         headers: requestHeaders
       });
 
