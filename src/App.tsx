@@ -24,12 +24,22 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   
   console.log('=== APP ROUTING DEBUG ===');
   console.log('Current pathname:', window.location.pathname);
   console.log('User authenticated:', !!user);
-  console.log('User loading state from AuthProvider');
+  console.log('Loading state:', loading);
+  
+  // Show loading state while AuthProvider is checking session
+  if (loading) {
+    console.log('Auth still loading, showing loading state');
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
   
   if (user) {
     console.log('User is authenticated, rendering main app routes');
