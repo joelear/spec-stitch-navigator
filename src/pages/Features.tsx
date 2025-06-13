@@ -6,51 +6,72 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Plus, FileText, FolderOpen, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const mockFeatures = [
+const mockFolders = [
   {
-    id: "task-management",
-    title: "Task Management",
-    version: "v1.2.1",
-    status: "Live",
-    folder: "Core Features",
-    owners: ["Alice", "Bob"],
-    lastEdit: "2 hours ago",
-    components: 5,
+    id: "core-features",
+    name: "Core Features",
+    features: [
+      {
+        id: "task-management",
+        title: "Task Management",
+        version: "v1.2.1",
+        status: "Live",
+        owners: ["Alice", "Bob"],
+        lastEdit: "2 hours ago",
+        userStories: 3,
+        scenarios: 8,
+      },
+      {
+        id: "settings-panel",
+        title: "Settings Panel", 
+        version: "v2.0.0",
+        status: "Live",
+        owners: ["Alice", "Dave"],
+        lastEdit: "3 days ago",
+        userStories: 5,
+        scenarios: 12,
+      },
+    ]
   },
   {
-    id: "user-onboarding",
-    title: "User Onboarding",
-    version: "v0.3.0",
-    status: "Draft",
-    folder: "User Experience",
-    owners: ["Charlie"],
-    lastEdit: "1 day ago",
-    components: 8,
-  },
-  {
-    id: "settings-panel",
-    title: "Settings Panel", 
-    version: "v2.0.0",
-    status: "Live",
-    folder: "Core Features",
-    owners: ["Alice", "Dave"],
-    lastEdit: "3 days ago",
-    components: 12,
+    id: "user-experience",
+    name: "User Experience",
+    features: [
+      {
+        id: "user-onboarding",
+        title: "User Onboarding",
+        version: "v0.3.0",
+        status: "Draft",
+        owners: ["Charlie"],
+        lastEdit: "1 day ago",
+        userStories: 4,
+        scenarios: 6,
+      },
+    ]
   },
 ];
 
-const folders = ["All", "Core Features", "User Experience", "Integrations"];
+const folderNames = ["All", ...mockFolders.map(f => f.name)];
 
 export default function Features() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFolder, setSelectedFolder] = useState("All");
   const navigate = useNavigate();
 
-  const filteredFeatures = mockFeatures.filter(feature => {
-    const matchesSearch = feature.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFolder = selectedFolder === "All" || feature.folder === selectedFolder;
-    return matchesSearch && matchesFolder;
-  });
+  const filteredFolders = mockFolders.map(folder => ({
+    ...folder,
+    features: folder.features.filter(feature => {
+      const matchesSearch = feature.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesFolder = selectedFolder === "All" || folder.name === selectedFolder;
+      return matchesSearch && matchesFolder;
+    })
+  })).filter(folder => folder.features.length > 0);
+
+  const allFeatures = mockFolders.flatMap(folder => 
+    folder.features.map(feature => ({ ...feature, folderName: folder.name }))
+  );
+  
+  const hasResults = filteredFolders.length > 0;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -89,7 +110,7 @@ export default function Features() {
         </div>
         
         <div className="flex gap-1">
-          {folders.map(folder => (
+          {folderNames.map(folder => (
             <Button
               key={folder}
               variant={selectedFolder === folder ? "default" : "outline"}
@@ -104,7 +125,7 @@ export default function Features() {
       </div>
 
       {/* Features List */}
-      {filteredFeatures.length === 0 ? (
+      {!hasResults ? (
         <div className="text-center py-12">
           <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">No features found</h3>
@@ -119,55 +140,66 @@ export default function Features() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {filteredFeatures.map((feature) => (
-            <Card 
-              key={feature.id}
-              className="cursor-pointer hover:bg-accent/50 transition-colors"
-              onClick={() => navigate(`/features/${feature.id}`)}
-            >
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <CardTitle className="text-lg">{feature.title}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{feature.folder}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {feature.version}
-                    </Badge>
-                    <Badge variant="outline" className={getStatusColor(feature.status)}>
-                      {feature.status}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>{feature.components} components</span>
-                    <span>Updated {feature.lastEdit}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-muted-foreground" />
-                    <div className="flex -space-x-1">
-                      {feature.owners.map((owner, index) => (
-                        <div
-                          key={owner}
-                          className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium border-2 border-background"
-                          title={owner}
-                        >
-                          {owner[0]}
+        <div className="space-y-6">
+          {filteredFolders.map((folder) => (
+            <div key={folder.id}>
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <FolderOpen className="w-5 h-5" />
+                {folder.name}
+              </h2>
+              <div className="grid gap-4">
+                {folder.features.map((feature) => (
+                  <Card 
+                    key={feature.id}
+                    className="cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => navigate(`/features/${feature.id}`)}
+                  >
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-5 h-5 text-muted-foreground" />
+                          <div>
+                            <CardTitle className="text-lg">{feature.title}</CardTitle>
+                            <p className="text-sm text-muted-foreground">{folder.name}</p>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {feature.version}
+                          </Badge>
+                          <Badge variant="outline" className={getStatusColor(feature.status)}>
+                            {feature.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>{feature.userStories} user stories</span>
+                          <span>{feature.scenarios} scenarios</span>
+                          <span>Updated {feature.lastEdit}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-muted-foreground" />
+                          <div className="flex -space-x-1">
+                            {feature.owners.map((owner) => (
+                              <div
+                                key={owner}
+                                className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium border-2 border-background"
+                                title={owner}
+                              >
+                                {owner[0]}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}

@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Save, Edit, Eye, Users, ChevronDown } from "lucide-react";
+import { TaggedText } from "@/components/TaggedText";
+import { Save, Edit, Eye, Users, FileText, Layers, Plus } from "lucide-react";
 
 const mockFeatureData = {
   "task-management": {
@@ -16,42 +17,66 @@ const mockFeatureData = {
     folder: "Core Features",
     owners: ["Alice", "Bob"],
     lastEdit: "2 hours ago",
-    content: `# Task Management Feature
-
-## Overview
-This feature enables users to create, manage, and organize their tasks efficiently.
-
-## User Stories
-
-### As a user, I want to create tasks
-- I can click the {{ui:AddTaskButton}} to open the task creation dialog
-- I can enter a task title and description
-- I can assign due dates and priorities
-
-### As a user, I want to view my tasks
-- I see all my tasks displayed in {{ui:TodoCard}} components
-- I can filter tasks by status, priority, or due date
-- I can search through my task list
-
-## Components Used
-- {{ui:AddTaskButton}} - Primary action to create new tasks
-- {{ui:TodoCard}} - Display individual task information
-- {{ui:TaskFilter}} - Filter and search functionality
-- {{ui:TaskDialog}} - Modal for task creation/editing
-
-## Acceptance Criteria
-- [ ] Users can create tasks with title, description, due date
-- [ ] Tasks are saved and persist across sessions
-- [ ] Users can mark tasks as complete
-- [ ] Completed tasks are visually distinct
-- [ ] Users can delete tasks
-`,
-    components: [
-      { id: "AddTaskButton", type: "button" },
-      { id: "TodoCard", type: "card" },
-      { id: "TaskFilter", type: "input" },
-      { id: "TaskDialog", type: "modal" },
+    userStories: [
+      {
+        id: "create-tasks",
+        title: "As a user, I want to create tasks",
+        description: "So that I can organize my work and track what needs to be done",
+        scenarios: [
+          {
+            id: "create-basic-task",
+            type: "given-when-then",
+            text: "Given I am on the {{screen.HomeScreen}} And I am logged in When I click the {{ui.AddTaskButton}} Then a new {{ui.TaskCard.Empty}} appears And I can enter task details"
+          },
+          {
+            id: "create-task-with-priority",
+            type: "given-when-then", 
+            text: "Given I have a new task open When I set the priority to {{ui.PrioritySelector.High}} And I save the task Then the task appears with a red priority indicator"
+          }
+        ]
+      },
+      {
+        id: "view-tasks",
+        title: "As a user, I want to view my tasks",
+        description: "So that I can see what work I have to do",
+        scenarios: [
+          {
+            id: "view-task-list",
+            type: "given-when-then",
+            text: "Given I have existing tasks When I navigate to {{screen.TaskListScreen}} Then I see all my tasks displayed as {{ui.TaskCard}} components"
+          },
+          {
+            id: "filter-tasks",
+            type: "given-when-then",
+            text: "Given I am viewing my task list When I click the {{ui.TaskFilter.Status}} dropdown And I select 'In Progress' Then only tasks with 'In Progress' status are displayed"
+          }
+        ]
+      },
+      {
+        id: "complete-tasks",
+        title: "As a user, I want to mark tasks as complete",
+        description: "So that I can track my progress",
+        scenarios: [
+          {
+            id: "mark-complete",
+            type: "given-when-then",
+            text: "Given I have a task in progress When I click the {{ui.CheckboxButton}} on the {{ui.TaskCard}} Then the task is marked as complete And it moves to the completed section"
+          }
+        ]
+      }
     ],
+    components: [
+      { id: "AddTaskButton", type: "button", variants: [] },
+      { id: "TaskCard", type: "card", variants: ["Empty", "InProgress", "Complete"] },
+      { id: "TaskFilter", type: "input", variants: ["Status", "Priority"] },
+      { id: "TaskDialog", type: "modal", variants: [] },
+      { id: "PrioritySelector", type: "select", variants: ["High", "Medium", "Low"] },
+      { id: "CheckboxButton", type: "button", variants: [] },
+    ],
+    screens: [
+      { id: "HomeScreen", name: "Home Screen" },
+      { id: "TaskListScreen", name: "Task List Screen" },
+    ]
   },
 };
 
@@ -154,13 +179,40 @@ export default function FeatureDetail() {
               <CardTitle className="text-sm">Components</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {feature.components.map((component) => (
-                  <div key={component.id} className="flex items-center justify-between text-sm">
-                    <span>{component.id}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {component.type}
-                    </Badge>
+                  <div key={component.id} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">{component.id}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {component.type}
+                      </Badge>
+                    </div>
+                    {component.variants.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {component.variants.map((variant) => (
+                          <Badge key={variant} variant="secondary" className="text-xs">
+                            {variant}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Screens</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {feature.screens.map((screen) => (
+                  <div key={screen.id} className="flex items-center gap-2 text-sm">
+                    <Layers className="w-4 h-4 text-muted-foreground" />
+                    <span>{screen.name}</span>
                   </div>
                 ))}
               </div>
@@ -169,26 +221,46 @@ export default function FeatureDetail() {
         </div>
 
         {/* Main Content */}
-        <div className="lg:col-span-3">
-          <Card>
-            <CardHeader>
-              <CardTitle>Feature Specification</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isEditing ? (
-                <Textarea
-                  value={content || feature.content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="min-h-[600px] font-mono text-sm"
-                  placeholder="Write your feature specification in Markdown..."
-                />
-              ) : (
-                <div className="prose prose-sm max-w-none">
-                  <pre className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {feature.content}
-                  </pre>
+        <div className="lg:col-span-3 space-y-6">
+          {feature.userStories.map((userStory) => (
+            <Card key={userStory.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-muted-foreground" />
+                    <CardTitle className="text-lg">{userStory.title}</CardTitle>
+                  </div>
+                  <Button variant="ghost" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Scenario
+                  </Button>
                 </div>
-              )}
+                <p className="text-sm text-muted-foreground">{userStory.description}</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {userStory.scenarios.map((scenario) => (
+                    <div key={scenario.id} className="border rounded-lg p-4 bg-muted/20">
+                      <h4 className="font-medium text-sm mb-2 capitalize">
+                        {scenario.type.replace('-', ' ')} Scenario
+                      </h4>
+                      <div className="text-sm leading-relaxed">
+                        <TaggedText text={scenario.text} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Add User Story Button */}
+          <Card className="border-dashed">
+            <CardContent className="flex items-center justify-center py-8">
+              <Button variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Add User Story
+              </Button>
             </CardContent>
           </Card>
         </div>
