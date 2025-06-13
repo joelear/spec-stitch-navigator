@@ -30,7 +30,9 @@ serve(async (req) => {
       throw new Error("Unauthorized");
     }
 
-    // Get user's GitHub token
+    const { action, repository } = await req.json();
+
+    // Get user's GitHub access token
     const { data: profile } = await supabaseClient
       .from("profiles")
       .select("github_access_token")
@@ -41,94 +43,55 @@ serve(async (req) => {
       throw new Error("GitHub not connected");
     }
 
-    if (req.method === "GET") {
-      // Fetch repositories from GitHub API
-      const response = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
+    if (action === "list") {
+      // Get user's GitHub repositories
+      const reposResponse = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
         headers: {
           Authorization: `Bearer ${profile.github_access_token}`,
-          "User-Agent": "SpecGraph-App",
+          "User-Agent": "Supabase-Function",
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status}`);
-      }
-
-      const repos = await response.json();
-
-      // Store repositories in our database
-      for (const repo of repos) {
-        await supabaseClient
-          .from("github_repositories")
-          .upsert({
-            user_id: user.id,
-            github_id: repo.id,
-            name: repo.name,
-            full_name: repo.full_name,
-            description: repo.description,
-            html_url: repo.html_url,
-            clone_url: repo.clone_url,
-            default_branch: repo.default_branch || "main",
-            private: repo.private,
-            language: repo.language,
-            stars_count: repo.stargazers_count,
-            forks_count: repo.forks_count,
-          }, {
-            onConflict: "user_id,github_id"
-          });
-      }
+      const repositories = await reposResponse.json();
 
       return new Response(
-        JSON.stringify({ repositories: repos }),
+        JSON.stringify({ repositories }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (req.method === "POST") {
-      const { repoId, action } = await req.json();
+    if (action === "connect") {
+      // Store repository connection in database
+      const { error } = await supabaseClient
+        .from("github_repositories")
+        .upsert({
+          user_id: user.id,
+          github_id: repository.id,
+          name: repository.name,
+          full_name: repository.full_name,
+          description: repository.description,
+          private: repository.private,
+          html_url: repository.html_url,
+          clone_url: repository.clone_url,
+          language: repository.language,
+          stars_count: repository.stargazers_count,
+          forks_count: repository.forks_count,
+          default_branch: repository.default_branch,
+          is_connected: true,
+          connected_at: new Date().toISOString(),
+        });
 
-      if (action === "connect") {
-        // Mark repository as connected
-        const { error } = await supabaseClient
-          .from("github_repositories")
-          .update({
-            is_connected: true,
-            connected_at: new Date().toISOString(),
-          })
-          .eq("user_id", user.id)
-          .eq("github_id", repoId);
+      if (error) throw error;
 
-        if (error) throw error;
-
-        return new Response(
-          JSON.stringify({ success: true }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      if (action === "disconnect") {
-        // Mark repository as disconnected
-        const { error } = await supabaseClient
-          .from("github_repositories")
-          .update({
-            is_connected: false,
-            connected_at: null,
-          })
-          .eq("user_id", user.id)
-          .eq("github_id", repoId);
-
-        if (error) throw error;
-
-        return new Response(
-          JSON.stringify({ success: true }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      return new Response(
+        JSON.stringify({ success: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ error: "Invalid action" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
   } catch (error) {

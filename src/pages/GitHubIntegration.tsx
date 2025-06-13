@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,13 +13,51 @@ export default function GitHubIntegration() {
   const [isConnected, setIsConnected] = useState(false);
   const [githubUsername, setGithubUsername] = useState('');
   const [repositories, setRepositories] = useState<any[]>([]);
+  const [connectedRepos, setConnectedRepos] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  const [showAddRepo, setShowAddRepo] = useState(false);
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
 
   useEffect(() => {
-    checkGitHubConnection();
-  }, []);
+    // Handle OAuth callback
+    const code = searchParams.get('code');
+    if (code) {
+      handleOAuthCallback(code);
+    } else {
+      checkGitHubConnection();
+    }
+  }, [searchParams]);
+
+  const handleOAuthCallback = async (code: string) => {
+    setIsConnecting(true);
+    try {
+      const { data } = await supabase.functions.invoke('github-auth', {
+        body: { code }
+      });
+
+      if (data?.success) {
+        toast({
+          title: "GitHub Connected!",
+          description: `Successfully connected as @${data.username}`,
+        });
+        setIsConnected(true);
+        setGithubUsername(data.username);
+        loadConnectedRepos();
+        // Clear the URL parameters
+        window.history.replaceState({}, '', '/integrations/github');
+      }
+    } catch (error) {
+      toast({
+        title: "Connection Failed",
+        description: "Failed to connect GitHub account",
+        variant: "destructive",
+      });
+    }
+    setIsConnecting(false);
+  };
 
   const checkGitHubConnection = async () => {
     try {
@@ -30,7 +69,7 @@ export default function GitHubIntegration() {
       if (data?.github_username) {
         setIsConnected(true);
         setGithubUsername(data.github_username);
-        loadRepositories();
+        loadConnectedRepos();
       }
     } catch (error) {
       console.error('Error checking GitHub connection:', error);
@@ -38,7 +77,7 @@ export default function GitHubIntegration() {
   };
 
   const connectGitHub = () => {
-    const clientId = 'Ov23liMx9QoU06bIIGt4'; // Your actual GitHub client ID (safe to expose)
+    const clientId = 'Ov23liTWhFWL1OAIv8fl'; // Your actual GitHub client ID (safe to expose)
     const redirectUri = `${window.location.origin}/integrations/github`;
     const scope = 'repo';
     
@@ -50,7 +89,7 @@ export default function GitHubIntegration() {
     setIsLoading(true);
     try {
       const { data } = await supabase.functions.invoke('github-repos', {
-        method: 'GET'
+        body: { action: 'list' }
       });
       
       if (data?.repositories) {
@@ -66,11 +105,26 @@ export default function GitHubIntegration() {
     setIsLoading(false);
   };
 
-  const connectRepository = async (repoId: number) => {
+  const loadConnectedRepos = async () => {
+    try {
+      const { data } = await supabase
+        .from('github_repositories')
+        .select('*')
+        .eq('is_connected', true)
+        .order('connected_at', { ascending: false });
+      
+      if (data) {
+        setConnectedRepos(data);
+      }
+    } catch (error) {
+      console.error('Error loading connected repos:', error);
+    }
+  };
+
+  const connectRepository = async (repoData: any) => {
     try {
       await supabase.functions.invoke('github-repos', {
-        method: 'POST',
-        body: { repoId, action: 'connect' }
+        body: { action: 'connect', repository: repoData }
       });
       
       toast({
@@ -78,7 +132,8 @@ export default function GitHubIntegration() {
         description: "Repository has been linked to your account",
       });
       
-      loadRepositories();
+      loadConnectedRepos();
+      setShowAddRepo(false);
     } catch (error) {
       toast({
         title: "Error connecting repository",
@@ -111,7 +166,16 @@ export default function GitHubIntegration() {
         </p>
       </div>
 
-      {!isConnected ? (
+      {isConnecting ? (
+        <Card>
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p>Connecting to GitHub...</p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : !isConnected ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -147,8 +211,15 @@ export default function GitHubIntegration() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={loadRepositories} disabled={isLoading}>
-                  Refresh Repositories
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    if (!showAddRepo) loadRepositories();
+                    setShowAddRepo(!showAddRepo);
+                  }}
+                >
+                  Add Repository
                 </Button>
                 <Button variant="ghost" size="sm">
                   <ExternalLink className="w-4 h-4 mr-2" />
@@ -158,62 +229,54 @@ export default function GitHubIntegration() {
             </CardContent>
           </Card>
 
-          {/* Repositories List */}
+          {/* Connected Repositories */}
           <Card>
             <CardHeader>
-              <CardTitle>Your Repositories</CardTitle>
+              <CardTitle>Connected Repositories</CardTitle>
               <CardDescription>
-                Select repositories to connect and scan for UI components
+                Repositories linked to your account for component scanning
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <div className="flex items-center justify-center p-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                </div>
-              ) : repositories.length === 0 ? (
+              {connectedRepos.length === 0 ? (
                 <div className="text-center p-8">
                   <Github className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No repositories found</h3>
+                  <h3 className="text-lg font-medium mb-2">No repositories connected</h3>
                   <p className="text-muted-foreground mb-4">
-                    No repositories are available in your GitHub account
+                    Connect repositories to start scanning for components and features
                   </p>
-                  <Button onClick={loadRepositories}>
-                    Refresh Repositories
+                  <Button onClick={() => {
+                    loadRepositories();
+                    setShowAddRepo(true);
+                  }}>
+                    Add Repository
                   </Button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {repositories.map((repo) => (
+                  {connectedRepos.map((repo) => (
                     <div key={repo.id} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="font-medium">{repo.full_name}</h4>
                           {repo.private && <Badge variant="secondary" className="text-xs">Private</Badge>}
                           {repo.language && <Badge variant="outline" className="text-xs">{repo.language}</Badge>}
+                          <Badge variant="outline" className="text-xs text-green-600">Connected</Badge>
                         </div>
                         {repo.description && (
                           <p className="text-sm text-muted-foreground mt-1">{repo.description}</p>
                         )}
                         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                          <span>⭐ {repo.stargazers_count}</span>
+                          <span>⭐ {repo.stars_count}</span>
                           <span>🍴 {repo.forks_count}</span>
-                          <span>Updated: {new Date(repo.updated_at).toLocaleDateString()}</span>
+                          <span>Connected: {new Date(repo.connected_at).toLocaleDateString()}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => connectRepository(repo.id)}
-                        >
-                          <LinkIcon className="w-4 h-4 mr-2" />
-                          Connect
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => scanRepository(repo.id)}
+                          onClick={() => scanRepository(repo.github_id)}
                           disabled={isScanning}
                         >
                           {isScanning ? (
@@ -230,6 +293,73 @@ export default function GitHubIntegration() {
               )}
             </CardContent>
           </Card>
+
+          {/* Add Repository Modal */}
+          {showAddRepo && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Add Repository</CardTitle>
+                <CardDescription>
+                  Select a repository from your GitHub account to connect
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : repositories.length === 0 ? (
+                  <div className="text-center p-8">
+                    <Github className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No repositories found</h3>
+                    <p className="text-muted-foreground mb-4">
+                      No repositories are available in your GitHub account
+                    </p>
+                    <Button onClick={loadRepositories}>
+                      Refresh Repositories
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {repositories
+                      .filter(repo => !connectedRepos.some(connected => connected.github_id === repo.id))
+                      .map((repo) => (
+                      <div key={repo.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{repo.full_name}</h4>
+                            {repo.private && <Badge variant="secondary" className="text-xs">Private</Badge>}
+                            {repo.language && <Badge variant="outline" className="text-xs">{repo.language}</Badge>}
+                          </div>
+                          {repo.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{repo.description}</p>
+                          )}
+                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                            <span>⭐ {repo.stargazers_count}</span>
+                            <span>🍴 {repo.forks_count}</span>
+                            <span>Updated: {new Date(repo.updated_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => connectRepository(repo)}
+                        >
+                          <LinkIcon className="w-4 h-4 mr-2" />
+                          Connect
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-4">
+                  <Button variant="ghost" onClick={() => setShowAddRepo(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>
