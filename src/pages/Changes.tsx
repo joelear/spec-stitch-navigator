@@ -6,9 +6,11 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Bell, AlertTriangle, Plus, Check, ExternalLink } from "lucide-react";
 
 const mockChanges = [
+  // Changes detected from external sources (design/code)
   {
     id: "1",
     type: "Design",
+    source: "detected", // detected from external sources
     severity: "warning",
     title: "AddTaskButton design changed",
     description: "Button color and padding updated in Figma",
@@ -19,6 +21,7 @@ const mockChanges = [
   {
     id: "2", 
     type: "Code",
+    source: "detected",
     severity: "info",
     title: "New component detected",
     description: "NavigationBar component found in latest scan",
@@ -29,6 +32,7 @@ const mockChanges = [
   {
     id: "3",
     type: "Spec",
+    source: "detected",
     severity: "error", 
     title: "TodoCard prop removed",
     description: "isCompleted prop no longer exists in code but referenced in feature spec",
@@ -39,6 +43,7 @@ const mockChanges = [
   {
     id: "4",
     type: "Design",
+    source: "detected",
     severity: "success",
     title: "UserAvatar design synced",
     description: "Design updates successfully implemented in code",
@@ -46,21 +51,51 @@ const mockChanges = [
     status: "resolved",
     component: "UserAvatar",
   },
+  // Changes initiated from specs
+  {
+    id: "5",
+    type: "Feature",
+    source: "spec", // initiated from spec changes
+    severity: "info",
+    title: "New user onboarding flow",
+    description: "Feature spec created - needs design and development",
+    timestamp: "1 hour ago",
+    status: "design",
+    component: "OnboardingWizard",
+    stage: "design", // design -> development -> complete
+  },
+  {
+    id: "6",
+    type: "Feature",
+    source: "spec",
+    severity: "warning",
+    title: "Task filtering enhancement",
+    description: "Spec updated with new filtering requirements",
+    timestamp: "3 hours ago",
+    status: "development",
+    component: "TaskFilter",
+    stage: "development",
+  },
 ];
 
 const filters = ["All", "Unresolved", "Mine"];
-const categories = ["All", "Design", "Code", "Spec"];
+const categories = ["All", "Design", "Code", "Spec", "Feature"];
+const sources = ["All", "Detected", "Spec-driven"];
 
 export default function Changes() {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedSource, setSelectedSource] = useState("All");
 
   const filteredChanges = mockChanges.filter(change => {
     const matchesFilter = selectedFilter === "All" || 
       (selectedFilter === "Unresolved" && change.status === "unresolved") ||
       (selectedFilter === "Mine" && change.status === "unresolved"); // Mock logic
     const matchesCategory = selectedCategory === "All" || change.type === selectedCategory;
-    return matchesFilter && matchesCategory;
+    const matchesSource = selectedSource === "All" || 
+      (selectedSource === "Detected" && change.source === "detected") ||
+      (selectedSource === "Spec-driven" && change.source === "spec");
+    return matchesFilter && matchesCategory && matchesSource;
   });
 
   const getSeverityIcon = (severity: string) => {
@@ -122,6 +157,19 @@ export default function Changes() {
             </Button>
           ))}
         </div>
+
+        <div className="flex gap-1">
+          {sources.map(source => (
+            <Button
+              key={source}
+              variant={selectedSource === source ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedSource(source)}
+            >
+              {source}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Changes List */}
@@ -152,6 +200,14 @@ export default function Changes() {
                         <Badge variant="outline" className="text-xs">
                           {change.type}
                         </Badge>
+                        <Badge variant="secondary" className="text-xs">
+                          {change.source === "detected" ? "Detected" : "Spec-driven"}
+                        </Badge>
+                        {change.source === "spec" && change.stage && (
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {change.stage}
+                          </Badge>
+                        )}
                         {change.status === "resolved" && (
                           <StatusBadge status="synced" />
                         )}
@@ -164,9 +220,16 @@ export default function Changes() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {change.status === "unresolved" && (
+                    {change.source === "detected" && change.status === "unresolved" && (
                       <Button variant="outline" size="sm">
                         Resolve
+                      </Button>
+                    )}
+                    {change.source === "spec" && (
+                      <Button variant="outline" size="sm">
+                        {change.stage === "design" ? "Start Design" : 
+                         change.stage === "development" ? "Start Development" : 
+                         "View Details"}
                       </Button>
                     )}
                     <Button variant="ghost" size="sm">

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TaggedText } from "@/components/TaggedText";
 import { Save, Edit, Eye, Users, FileText, Layers, Plus } from "lucide-react";
 
@@ -25,13 +26,26 @@ const mockFeatureData = {
         scenarios: [
           {
             id: "create-basic-task",
+            name: "Create a basic task",
             type: "given-when-then",
-            text: "Given I am on the {{screen.HomeScreen}} And I am logged in When I click the {{ui.AddTaskButton}} Then a new {{ui.TaskCard.Empty}} appears And I can enter task details"
+            steps: [
+              { type: "given", text: "I am on the {{screen.HomeScreen}}" },
+              { type: "and", text: "I am logged in" },
+              { type: "when", text: "I click the {{ui.AddTaskButton}}" },
+              { type: "then", text: "a new {{ui.TaskCard.Empty}} appears" },
+              { type: "and", text: "I can enter task details" }
+            ]
           },
           {
             id: "create-task-with-priority",
+            name: "Create task with priority",
             type: "given-when-then", 
-            text: "Given I have a new task open When I set the priority to {{ui.PrioritySelector.High}} And I save the task Then the task appears with a red priority indicator"
+            steps: [
+              { type: "given", text: "I have a new task open" },
+              { type: "when", text: "I set the priority to {{ui.PrioritySelector.High}}" },
+              { type: "and", text: "I save the task" },
+              { type: "then", text: "the task appears with a red priority indicator" }
+            ]
           }
         ]
       },
@@ -42,13 +56,24 @@ const mockFeatureData = {
         scenarios: [
           {
             id: "view-task-list",
+            name: "View task list",
             type: "given-when-then",
-            text: "Given I have existing tasks When I navigate to {{screen.TaskListScreen}} Then I see all my tasks displayed as {{ui.TaskCard}} components"
+            steps: [
+              { type: "given", text: "I have existing tasks" },
+              { type: "when", text: "I navigate to {{screen.TaskListScreen}}" },
+              { type: "then", text: "I see all my tasks displayed as {{ui.TaskCard}} components" }
+            ]
           },
           {
             id: "filter-tasks",
+            name: "Filter tasks by status",
             type: "given-when-then",
-            text: "Given I am viewing my task list When I click the {{ui.TaskFilter.Status}} dropdown And I select 'In Progress' Then only tasks with 'In Progress' status are displayed"
+            steps: [
+              { type: "given", text: "I am viewing my task list" },
+              { type: "when", text: "I click the {{ui.TaskFilter.Status}} dropdown" },
+              { type: "and", text: "I select 'In Progress'" },
+              { type: "then", text: "only tasks with 'In Progress' status are displayed" }
+            ]
           }
         ]
       },
@@ -59,8 +84,14 @@ const mockFeatureData = {
         scenarios: [
           {
             id: "mark-complete",
+            name: "Mark task as complete",
             type: "given-when-then",
-            text: "Given I have a task in progress When I click the {{ui.CheckboxButton}} on the {{ui.TaskCard}} Then the task is marked as complete And it moves to the completed section"
+            steps: [
+              { type: "given", text: "I have a task in progress" },
+              { type: "when", text: "I click the {{ui.CheckboxButton}} on the {{ui.TaskCard}}" },
+              { type: "then", text: "the task is marked as complete" },
+              { type: "and", text: "it moves to the completed section" }
+            ]
           }
         ]
       }
@@ -171,12 +202,99 @@ export default function FeatureDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar */}
-        <div className="space-y-4">
+      <Tabs defaultValue="scenarios" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="scenarios">User Stories</TabsTrigger>
+          <TabsTrigger value="design">Design</TabsTrigger>
+          <TabsTrigger value="components">Components</TabsTrigger>
+          <TabsTrigger value="screens">Screens</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="scenarios" className="space-y-6">
+          {/* Main Content */}
+          {feature.userStories.map((userStory) => (
+            <Card key={userStory.id}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-muted-foreground" />
+                    <CardTitle className="text-lg">{userStory.title}</CardTitle>
+                  </div>
+                  <Button variant="ghost" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Scenario
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">{userStory.description}</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Scenarios */}
+                  <div className="space-y-4">
+                    {userStory.scenarios.map((scenario) => (
+                      <div key={scenario.id} className="border rounded-lg p-4 bg-muted/20">
+                        <h4 className="font-medium text-sm mb-3">{scenario.name}</h4>
+                        <div className="space-y-2">
+                          {scenario.steps.map((step, index) => (
+                            <div key={index} className="flex gap-3 text-sm">
+                              <span className="text-muted-foreground font-medium capitalize min-w-12">
+                                {step.type}:
+                              </span>
+                              <div className="flex-1">
+                                <TaggedText text={step.text} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Design Preview */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm">Design Preview</h4>
+                    <div className="border rounded-lg p-4 bg-muted/10 text-center text-muted-foreground">
+                      <Layers className="w-8 h-8 mx-auto mb-2" />
+                      <p className="text-sm">Design preview will appear here</p>
+                      <p className="text-xs">Connect Figma to see designs</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Add User Story Button */}
+          <Card className="border-dashed">
+            <CardContent className="flex items-center justify-center py-8">
+              <Button variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Add User Story
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="design">
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Components</CardTitle>
+              <CardTitle>Design Files</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12 text-muted-foreground">
+                <Layers className="w-12 h-12 mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No design files connected</h3>
+                <p className="mb-4">Connect Figma to see design files for this feature</p>
+                <Button variant="outline">Connect Figma</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="components">
+          <Card>
+            <CardHeader>
+              <CardTitle>Components</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -202,10 +320,12 @@ export default function FeatureDetail() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
+        <TabsContent value="screens">
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Screens</CardTitle>
+              <CardTitle>Screens</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
@@ -218,53 +338,8 @@ export default function FeatureDetail() {
               </div>
             </CardContent>
           </Card>
-        </div>
-
-        {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
-          {feature.userStories.map((userStory) => (
-            <Card key={userStory.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-muted-foreground" />
-                    <CardTitle className="text-lg">{userStory.title}</CardTitle>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Scenario
-                  </Button>
-                </div>
-                <p className="text-sm text-muted-foreground">{userStory.description}</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {userStory.scenarios.map((scenario) => (
-                    <div key={scenario.id} className="border rounded-lg p-4 bg-muted/20">
-                      <h4 className="font-medium text-sm mb-2 capitalize">
-                        {scenario.type.replace('-', ' ')} Scenario
-                      </h4>
-                      <div className="text-sm leading-relaxed">
-                        <TaggedText text={scenario.text} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {/* Add User Story Button */}
-          <Card className="border-dashed">
-            <CardContent className="flex items-center justify-center py-8">
-              <Button variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Add User Story
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

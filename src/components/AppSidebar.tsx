@@ -32,7 +32,7 @@ const navigationItems = [
 
 export function AppSidebar() {
   const location = useLocation();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   return (
     <Sidebar 
