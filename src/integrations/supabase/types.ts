@@ -9,7 +9,203 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      components: {
+        Row: {
+          created_at: string
+          features_count: number | null
+          file_path: string | null
+          has_figma: boolean | null
+          has_storybook: boolean | null
+          id: string
+          last_updated: string | null
+          name: string
+          repository_id: string | null
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+          variant: string | null
+        }
+        Insert: {
+          created_at?: string
+          features_count?: number | null
+          file_path?: string | null
+          has_figma?: boolean | null
+          has_storybook?: boolean | null
+          id?: string
+          last_updated?: string | null
+          name: string
+          repository_id?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+          variant?: string | null
+        }
+        Update: {
+          created_at?: string
+          features_count?: number | null
+          file_path?: string | null
+          has_figma?: boolean | null
+          has_storybook?: boolean | null
+          id?: string
+          last_updated?: string | null
+          name?: string
+          repository_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+          variant?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "components_repository_id_fkey"
+            columns: ["repository_id"]
+            isOneToOne: false
+            referencedRelation: "repositories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      features: {
+        Row: {
+          acceptance_criteria: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          order_index: number | null
+          parent_id: string | null
+          priority: string | null
+          repository_id: string | null
+          status: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acceptance_criteria?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          order_index?: number | null
+          parent_id?: string | null
+          priority?: string | null
+          repository_id?: string | null
+          status?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acceptance_criteria?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          order_index?: number | null
+          parent_id?: string | null
+          priority?: string | null
+          repository_id?: string | null
+          status?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "features_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "features"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "features_repository_id_fkey"
+            columns: ["repository_id"]
+            isOneToOne: false
+            referencedRelation: "repositories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          github_username: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          github_username?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          github_username?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      repositories: {
+        Row: {
+          created_at: string
+          default_branch: string | null
+          description: string | null
+          full_name: string
+          github_id: number | null
+          id: string
+          last_scan_at: string | null
+          name: string
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_branch?: string | null
+          description?: string | null
+          full_name: string
+          github_id?: number | null
+          id?: string
+          last_scan_at?: string | null
+          name: string
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_branch?: string | null
+          description?: string | null
+          full_name?: string
+          github_id?: number | null
+          id?: string
+          last_scan_at?: string | null
+          name?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
