@@ -87,7 +87,7 @@ export default function GitHubIntegration() {
       });
 
       const { data, error } = await supabase.functions.invoke('github-auth', {
-        body: JSON.stringify(requestData),
+        body: requestData,
         headers: requestHeaders
       });
 

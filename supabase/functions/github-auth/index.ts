@@ -76,19 +76,9 @@ serve(async (req) => {
     }
 
     if (req.method === "POST") {
-      // Parse request body more safely
-      let requestBody;
-      try {
-        const bodyText = await req.text();
-        console.log('Raw request body:', bodyText.length > 0 ? 'present' : 'empty');
-        if (!bodyText || bodyText.trim() === '') {
-          throw new Error('Request body is empty');
-        }
-        requestBody = JSON.parse(bodyText);
-      } catch (parseError) {
-        console.error('Failed to parse request body:', parseError.message);
-        throw new Error(`Invalid JSON in request body: ${parseError.message}`);
-      }
+      // Parse request body using req.json()
+      const requestBody = await req.json();
+      console.log('Request body received:', !!requestBody);
 
       const { code } = requestBody;
       console.log('GitHub auth: Received code:', !!code, code ? `${code.substring(0, 10)}...` : 'null');
