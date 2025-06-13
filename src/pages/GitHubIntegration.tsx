@@ -27,13 +27,20 @@ export default function GitHubIntegration() {
     const fullUrl = window.location.href;
     const allParams = Object.fromEntries(searchParams);
     
-    console.log('=== GitHub OAuth Debug ===');
-    console.log('Full URL:', fullUrl);
-    console.log('Current path:', window.location.pathname);
-    console.log('Search string:', window.location.search);
+    console.log('=== GITHUB OAUTH REDIRECT DEBUG ===');
+    console.log('Full URL when component loads:', fullUrl);
+    console.log('Current pathname:', window.location.pathname);
+    console.log('Current search:', window.location.search);
     console.log('All search params:', allParams);
     console.log('Code parameter:', code);
-    console.log('========================');
+    console.log('================================');
+    
+    // Log if this is likely a redirect from GitHub
+    if (window.location.search.includes('code=') || code) {
+      console.log('🚨 GITHUB REDIRECT DETECTED - Code found in URL');
+    } else {
+      console.log('📍 Normal page load - no GitHub code in URL');
+    }
     
     if (code) {
       console.log('Code found, calling handleOAuthCallback');
@@ -182,7 +189,13 @@ export default function GitHubIntegration() {
     const redirectUri = `${window.location.origin}/integrations/github`;
     const scope = 'repo';
     
+    console.log('=== GITHUB CONNECT DEBUG ===');
+    console.log('Origin:', window.location.origin);
+    console.log('Redirect URI being sent to GitHub:', redirectUri);
+    console.log('===========================');
+    
     const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+    console.log('Full GitHub auth URL:', authUrl);
     window.location.href = authUrl;
   };
 
