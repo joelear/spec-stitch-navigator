@@ -26,12 +26,10 @@ import {
 } from "lucide-react";
 
 const navigationItems = [
-  { title: "Repos", url: "/repos", icon: GitBranch },
-  { title: "Integrations", url: "/integrations", icon: Settings },
   { title: "Components", url: "/components", icon: Grid3X3 },
   { title: "Features", url: "/features", icon: FileText },
   { title: "Changes", url: "/changes", icon: Bell, badge: 3 },
-  { title: "GitHub", url: "/github", icon: Github },
+  { title: "Integrations", url: "/integrations", icon: Settings },
 ];
 
 export function AppSidebar() {

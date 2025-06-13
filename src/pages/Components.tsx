@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, Grid3X3, Filter, Database } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useDummyData } from "@/contexts/DummyDataContext";
 
 const mockComponents = [
   {
@@ -53,15 +54,15 @@ export default function Components() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
-  const [useDummyData, setUseDummyData] = useState(true);
+  const { isDummyDataEnabled } = useDummyData();
   const navigate = useNavigate();
 
-  const filteredComponents = mockComponents.filter(component => {
+  const filteredComponents = isDummyDataEnabled ? mockComponents.filter(component => {
     const matchesSearch = component.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === "All" || component.type === selectedType;
     const matchesStatus = selectedStatus === "All" || component.status === selectedStatus;
     return matchesSearch && matchesType && matchesStatus;
-  });
+  }) : [];
 
   return (
     <div className="flex h-full">
@@ -113,11 +114,11 @@ export default function Components() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setUseDummyData(!useDummyData)}
             className="gap-2"
+            disabled
           >
             <Database className="w-4 h-4" />
-            {useDummyData ? "Using Dummy Data" : "Using Real Data"}
+            {isDummyDataEnabled ? "Using Dummy Data" : "Using Real Data"}
           </Button>
         </div>
 
@@ -135,7 +136,18 @@ export default function Components() {
         </div>
 
       {/* Components Grid */}
-      {filteredComponents.length === 0 ? (
+      {!isDummyDataEnabled ? (
+        <div className="text-center py-12">
+          <Grid3X3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">No components yet</h3>
+          <p className="text-muted-foreground mb-4">
+            Connect your GitHub repositories and scan them to discover UI components
+          </p>
+          <Button asChild>
+            <Link to="/integrations/github">Connect GitHub</Link>
+          </Button>
+        </div>
+      ) : filteredComponents.length === 0 ? (
         <div className="text-center py-12">
           <Grid3X3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">No components found</h3>

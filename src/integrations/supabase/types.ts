@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          created_at: string
+          dummy_data_enabled: boolean | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dummy_data_enabled?: boolean | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dummy_data_enabled?: boolean | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       components: {
         Row: {
           created_at: string
@@ -131,12 +155,77 @@ export type Database = {
           },
         ]
       }
+      github_repositories: {
+        Row: {
+          clone_url: string
+          connected_at: string | null
+          created_at: string
+          default_branch: string | null
+          description: string | null
+          forks_count: number | null
+          full_name: string
+          github_id: number
+          html_url: string
+          id: string
+          is_connected: boolean | null
+          language: string | null
+          last_scan_at: string | null
+          name: string
+          private: boolean | null
+          stars_count: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          clone_url: string
+          connected_at?: string | null
+          created_at?: string
+          default_branch?: string | null
+          description?: string | null
+          forks_count?: number | null
+          full_name: string
+          github_id: number
+          html_url: string
+          id?: string
+          is_connected?: boolean | null
+          language?: string | null
+          last_scan_at?: string | null
+          name: string
+          private?: boolean | null
+          stars_count?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          clone_url?: string
+          connected_at?: string | null
+          created_at?: string
+          default_branch?: string | null
+          description?: string | null
+          forks_count?: number | null
+          full_name?: string
+          github_id?: number
+          html_url?: string
+          id?: string
+          is_connected?: boolean | null
+          language?: string | null
+          last_scan_at?: string | null
+          name?: string
+          private?: boolean | null
+          stars_count?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           email: string | null
           full_name: string | null
+          github_access_token: string | null
+          github_connected_at: string | null
           github_username: string | null
           id: string
           updated_at: string
@@ -147,6 +236,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           full_name?: string | null
+          github_access_token?: string | null
+          github_connected_at?: string | null
           github_username?: string | null
           id?: string
           updated_at?: string
@@ -157,6 +248,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           full_name?: string | null
+          github_access_token?: string | null
+          github_connected_at?: string | null
           github_username?: string | null
           id?: string
           updated_at?: string

@@ -1,172 +1,237 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Github, Scan, Download, CheckCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Github, Scan, Download, CheckCircle, ExternalLink, Link as LinkIcon, Unlink } from 'lucide-react';
 
 export default function GitHubIntegration() {
-  const [githubToken, setGithubToken] = useState('');
-  const [repoUrl, setRepoUrl] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
+  const [githubUsername, setGithubUsername] = useState('');
+  const [repositories, setRepositories] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [scanResults, setScanResults] = useState<any>(null);
   const { toast } = useToast();
 
-  const handleScanRepository = async () => {
-    if (!repoUrl) {
+  useEffect(() => {
+    checkGitHubConnection();
+  }, []);
+
+  const checkGitHubConnection = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('github_username, github_connected_at')
+        .single();
+      
+      if (data?.github_username) {
+        setIsConnected(true);
+        setGithubUsername(data.github_username);
+        loadRepositories();
+      }
+    } catch (error) {
+      console.error('Error checking GitHub connection:', error);
+    }
+  };
+
+  const connectGitHub = () => {
+    const clientId = 'your_github_client_id'; // This should be set in Supabase secrets
+    const redirectUri = `${window.location.origin}/integrations/github`;
+    const scope = 'repo';
+    
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+    window.location.href = authUrl;
+  };
+
+  const loadRepositories = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await supabase.functions.invoke('github-repos', {
+        method: 'GET'
+      });
+      
+      if (data?.repositories) {
+        setRepositories(data.repositories);
+      }
+    } catch (error) {
       toast({
-        title: "Repository URL required",
-        description: "Please enter a GitHub repository URL",
+        title: "Error loading repositories",
+        description: "Failed to fetch GitHub repositories",
         variant: "destructive",
       });
-      return;
     }
+    setIsLoading(false);
+  };
 
+  const connectRepository = async (repoId: number) => {
+    try {
+      await supabase.functions.invoke('github-repos', {
+        method: 'POST',
+        body: { repoId, action: 'connect' }
+      });
+      
+      toast({
+        title: "Repository connected!",
+        description: "Repository has been linked to your account",
+      });
+      
+      loadRepositories();
+    } catch (error) {
+      toast({
+        title: "Error connecting repository",
+        description: "Failed to connect repository",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const scanRepository = async (repoId: number) => {
     setIsScanning(true);
     
-    // Simulate scanning process
+    // TODO: Implement actual repository scanning
+    // This would analyze the repository structure and extract components/features
     setTimeout(() => {
-      setScanResults({
-        components: [
-          { name: 'Button', type: 'button', variants: ['primary', 'secondary'] },
-          { name: 'Card', type: 'card', variants: ['default', 'elevated'] },
-          { name: 'Input', type: 'input', variants: ['text', 'email', 'password'] },
-        ],
-        features: [
-          { name: 'User Authentication', type: 'feature', stories: 3 },
-          { name: 'Dashboard', type: 'feature', stories: 5 },
-          { name: 'Settings', type: 'feature', stories: 2 },
-        ]
-      });
-      setIsScanning(false);
       toast({
         title: "Scan completed!",
-        description: "Found components and features in your repository.",
+        description: "Repository has been scanned for components and features.",
       });
+      setIsScanning(false);
     }, 3000);
   };
 
-  const handleSaveToSupabase = async () => {
-    toast({
-      title: "Saved to database!",
-      description: "Components and features have been saved to your account.",
-    });
-  };
-
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">GitHub Integration</h1>
         <p className="text-muted-foreground">
-          Connect your GitHub repositories to automatically scan and catalog UI components and features
+          Connect your GitHub account to automatically scan and catalog UI components and features
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      {!isConnected ? (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Github className="w-5 h-5" />
-              Repository Scanner
+              Connect GitHub Account
             </CardTitle>
             <CardDescription>
-              Scan a GitHub repository to extract UI components and features
+              Authorize access to your GitHub repositories to automatically scan for components and features
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="github-token">GitHub Personal Access Token (Optional)</Label>
-              <Input
-                id="github-token"
-                type="password"
-                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                value={githubToken}
-                onChange={(e) => setGithubToken(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Required for private repositories
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="repo-url">Repository URL</Label>
-              <Input
-                id="repo-url"
-                placeholder="https://github.com/username/repository"
-                value={repoUrl}
-                onChange={(e) => setRepoUrl(e.target.value)}
-              />
-            </div>
-            
-            <Button 
-              onClick={handleScanRepository} 
-              className="w-full"
-              disabled={isScanning}
-            >
-              {isScanning ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Scanning Repository...
-                </>
-              ) : (
-                <>
-                  <Scan className="w-4 h-4 mr-2" />
-                  Scan Repository
-                </>
-              )}
+          <CardContent>
+            <Button onClick={connectGitHub} className="w-full">
+              <Github className="w-4 h-4 mr-2" />
+              Connect GitHub Account
             </Button>
+            <p className="text-xs text-muted-foreground mt-2">
+              This will redirect you to GitHub to authorize the application
+            </p>
           </CardContent>
         </Card>
-
-        {scanResults && (
+      ) : (
+        <div className="space-y-6">
+          {/* GitHub Account Status */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-500" />
-                Scan Results
+                GitHub Connected
               </CardTitle>
               <CardDescription>
-                Found {scanResults.components.length} components and {scanResults.features.length} features
+                Connected as @{githubUsername}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h4 className="font-medium mb-2">Components</h4>
-                <div className="space-y-2">
-                  {scanResults.components.map((component: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
-                      <span className="font-medium">{component.name}</span>
-                      <div className="flex gap-1">
-                        <Badge variant="secondary">{component.type}</Badge>
-                        <Badge variant="outline">{component.variants.length} variants</Badge>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={loadRepositories} disabled={isLoading}>
+                  Refresh Repositories
+                </Button>
+                <Button variant="ghost" size="sm">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  View on GitHub
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Repositories List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Repositories</CardTitle>
+              <CardDescription>
+                Select repositories to connect and scan for UI components
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : repositories.length === 0 ? (
+                <div className="text-center p-8">
+                  <Github className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No repositories found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    No repositories are available in your GitHub account
+                  </p>
+                  <Button onClick={loadRepositories}>
+                    Refresh Repositories
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {repositories.map((repo) => (
+                    <div key={repo.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">{repo.full_name}</h4>
+                          {repo.private && <Badge variant="secondary" className="text-xs">Private</Badge>}
+                          {repo.language && <Badge variant="outline" className="text-xs">{repo.language}</Badge>}
+                        </div>
+                        {repo.description && (
+                          <p className="text-sm text-muted-foreground mt-1">{repo.description}</p>
+                        )}
+                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                          <span>⭐ {repo.stargazers_count}</span>
+                          <span>🍴 {repo.forks_count}</span>
+                          <span>Updated: {new Date(repo.updated_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => connectRepository(repo.id)}
+                        >
+                          <LinkIcon className="w-4 h-4 mr-2" />
+                          Connect
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => scanRepository(repo.id)}
+                          disabled={isScanning}
+                        >
+                          {isScanning ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                          ) : (
+                            <Scan className="w-4 h-4 mr-2" />
+                          )}
+                          Scan
+                        </Button>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">Features</h4>
-                <div className="space-y-2">
-                  {scanResults.features.map((feature: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
-                      <span className="font-medium">{feature.name}</span>
-                      <Badge variant="outline">{feature.stories} stories</Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <Button onClick={handleSaveToSupabase} className="w-full">
-                <Download className="w-4 h-4 mr-2" />
-                Save to Database
-              </Button>
+              )}
             </CardContent>
           </Card>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

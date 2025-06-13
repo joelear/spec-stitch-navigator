@@ -5,6 +5,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
+import { DummyDataProvider } from "@/contexts/DummyDataContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AppHeader } from "@/components/AppHeader";
@@ -34,16 +35,16 @@ function AppContent() {
             <AppHeader />
             <main className="flex-1 overflow-auto">
               <Routes>
-                <Route path="/" element={<Repos />} />
-                <Route path="/repos" element={<Repos />} />
-                <Route path="/repos/:id" element={<RepoDashboard />} />
+                <Route path="/" element={<Integrations />} />
                 <Route path="/components" element={<Components />} />
                 <Route path="/components/:id" element={<ComponentDetail />} />
                 <Route path="/features" element={<Features />} />
                 <Route path="/features/:id" element={<FeatureDetail />} />
                 <Route path="/changes" element={<Changes />} />
                 <Route path="/integrations" element={<Integrations />} />
-                <Route path="/github" element={<GitHubIntegration />} />
+                <Route path="/integrations/repos" element={<Repos />} />
+                <Route path="/integrations/repos/:id" element={<RepoDashboard />} />
+                <Route path="/integrations/github" element={<GitHubIntegration />} />
                 <Route path="/auth" element={<Navigate to="/" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -69,7 +70,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <AppContent />
+          <DummyDataProvider>
+            <AppContent />
+          </DummyDataProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
