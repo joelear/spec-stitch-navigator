@@ -38,7 +38,7 @@ export default function GitHubIntegration() {
   };
 
   const connectGitHub = () => {
-    const clientId = 'your_github_client_id'; // This should be set in Supabase secrets
+    const clientId = 'Ov23liMx9QoU06bIIGt4'; // Your actual GitHub client ID (safe to expose)
     const redirectUri = `${window.location.origin}/integrations/github`;
     const scope = 'repo';
     
