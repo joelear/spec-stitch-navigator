@@ -76,7 +76,7 @@ serve(async (req) => {
     }
 
     if (req.method === "POST") {
-      // Parse request body using req.json()
+      // Parse request body using req.json() - Updated version
       const requestBody = await req.json();
       console.log('Request body received:', !!requestBody);
 
