@@ -76,16 +76,24 @@ serve(async (req) => {
     }
 
     if (req.method === "POST") {
-      // Parse request body using req.json() - Updated version
-      const requestBody = await req.json();
-      console.log('Request body received:', !!requestBody);
+      // Parse request body with better error handling
+      let requestBody;
+      try {
+        const bodyText = await req.text();
+        console.log('Raw request body:', bodyText);
+        requestBody = JSON.parse(bodyText);
+        console.log('Parsed request body:', requestBody);
+      } catch (parseError) {
+        console.error('Failed to parse request body:', parseError);
+        throw new Error(`Failed to parse request body: ${parseError.message}`);
+      }
 
-      const { code } = requestBody;
+      const code = requestBody?.code;
       console.log('GitHub auth: Received code:', !!code, code ? `${code.substring(0, 10)}...` : 'null');
       console.log('GitHub auth: User ID:', user.id);
 
       if (!code) {
-        throw new Error("No OAuth code provided");
+        throw new Error("No OAuth code provided in body or URL params");
       }
       
       // Exchange code for access token
