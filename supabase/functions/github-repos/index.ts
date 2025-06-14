@@ -73,17 +73,17 @@ serve(async (req) => {
     const { data: profiles, error: profileError } = await supabaseClient
       .from("profiles")
       .select("github_access_token, github_username")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     console.log('Profile query result:', {
-      profilesCount: profiles?.length || 0,
-      hasToken: !!(profiles?.[0]?.github_access_token),
-      username: profiles?.[0]?.github_username,
+      hasProfile: !!profiles,
+      hasToken: !!profiles?.github_access_token,
+      username: profiles?.github_username,
       error: profileError?.message
     });
 
-    const profile = profiles?.[0];
-    if (!profile?.github_access_token) {
+    if (!profiles?.github_access_token) {
       console.error('No GitHub access token found');
       return new Response(
         JSON.stringify({ error: "GitHub not connected" }),
@@ -96,7 +96,7 @@ serve(async (req) => {
       
       const githubResponse = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
         headers: {
-          Authorization: `Bearer ${profile.github_access_token}`,
+          Authorization: `Bearer ${profiles.github_access_token}`,
           "User-Agent": "SpecGraph/1.0",
           "Accept": "application/vnd.github.v3+json"
         },
