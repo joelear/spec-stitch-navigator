@@ -85,23 +85,23 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="transition-all duration-300 bg-sidebar border-sidebar-border">
-      <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <div className="flex items-center justify-between">
+    <Sidebar className="transition-all duration-300 bg-muted border-sidebar-border">
+      <SidebarHeader className="h-12 px-4 border-b border-sidebar-border">
+        <div className="flex items-center justify-between h-full">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <Grid3X3 className="w-4 h-4 text-primary-foreground" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm text-sidebar-foreground">Spec Graph</span>
-              <ChevronDown className="w-4 h-4 text-sidebar-foreground/60" />
+              <span className="font-semibold text-sm text-foreground">Spec Graph</span>
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleSidebar}
-            className="h-6 w-6 text-sidebar-foreground/60 hover:text-sidebar-foreground"
+            className="h-6 w-6 text-muted-foreground hover:text-foreground"
           >
             <PanelLeftClose className="h-4 w-4" />
           </Button>
@@ -130,7 +130,7 @@ export function AppSidebar() {
               ) : (
                 <ChevronRight className="w-3 h-3 text-sidebar-foreground/60" />
               )}
-              <SidebarGroupLabel className="text-xs font-medium text-sidebar-foreground/70 uppercase tracking-wider cursor-pointer p-0 h-auto">
+              <SidebarGroupLabel className="text-xs font-normal text-muted-foreground uppercase tracking-wider cursor-pointer p-0 h-auto">
                 {section.title}
               </SidebarGroupLabel>
             </div>
@@ -160,7 +160,6 @@ export function AppSidebar() {
                 </SidebarMenu>
               </SidebarGroupContent>
             )}
-            <div className="h-px bg-sidebar-border mt-2" />
           </SidebarGroup>
         ))}
       </SidebarContent>
