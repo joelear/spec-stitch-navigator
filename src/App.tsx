@@ -45,11 +45,11 @@ function AppContent() {
     console.log('User is authenticated, rendering main app routes');
     return (
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
+        <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden">
             <AppHeader />
-            <main className="flex-1 overflow-auto">
+            <main className="flex-1 flex flex-col overflow-hidden">
               <Routes>
                 <Route path="/" element={
                   (() => {

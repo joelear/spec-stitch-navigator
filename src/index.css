@@ -2,86 +2,110 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+/* Attio-inspired design system */
 
 @layer base {
   :root {
+    /* Core neutral colors - Attio style */
     --background: 0 0% 100%;
-    --foreground: 0 0% 7%;
+    --foreground: 217 19% 14%;
 
-    --card: 42 25% 96%;
-    --card-foreground: 0 0% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 217 19% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
+    --popover-foreground: 217 19% 14%;
 
-    --primary: 243 85% 73%;
+    /* Primary blue - Attio accent */
+    --primary: 213 94% 68%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 42 25% 96%;
-    --secondary-foreground: 0 0% 7%;
+    /* Secondary grays */
+    --secondary: 210 20% 98%;
+    --secondary-foreground: 217 19% 14%;
 
-    --muted: 42 25% 96%;
-    --muted-foreground: 30 4% 38%;
+    --muted: 210 20% 98%;
+    --muted-foreground: 215 13.8% 34.1%;
 
-    --accent: 42 20% 94%;
-    --accent-foreground: 0 0% 7%;
+    --accent: 210 40% 98%;
+    --accent-foreground: 217 19% 14%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 42 15% 91%;
-    --input: 42 15% 91%;
-    --ring: 243 85% 73%;
+    /* Borders and inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 213 94% 68%;
 
-    --radius: 0.5rem;
+    --radius: 0.375rem;
 
-    --sidebar-background: 42 25% 96%;
-    --sidebar-foreground: 30 4% 38%;
-    --sidebar-primary: 243 85% 73%;
+    /* Sidebar specific colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 13.8% 34.1%;
+    --sidebar-primary: 213 94% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 42 20% 94%;
-    --sidebar-accent-foreground: 0 0% 7%;
-    --sidebar-border: 42 15% 91%;
-    --sidebar-ring: 243 85% 73%;
+    --sidebar-accent: 210 40% 98%;
+    --sidebar-accent-foreground: 217 19% 14%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 213 94% 68%;
+
+    /* Table specific colors */
+    --table-background: 0 0% 100%;
+    --table-header-background: 0 0% 100%;
+    --table-border: 220 13% 91%;
+    --table-hover: 210 20% 98%;
+
+    /* Category pill colors */
+    --category-b2b: 219 95% 96%;
+    --category-b2b-foreground: 224 76% 48%;
+    --category-b2c: 326 78% 95%;
+    --category-b2c-foreground: 322 81% 43%;
+    --category-saas: 250 95% 96%;
+    --category-saas-foreground: 253 91% 64%;
+    --category-enterprise: 213 100% 96%;
+    --category-enterprise-foreground: 212 100% 47%;
+    --category-finance: 45 93% 87%;
+    --category-finance-foreground: 32 95% 44%;
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 95%;
+    --background: 222 84% 5%;
+    --foreground: 213 31% 91%;
 
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 95%;
+    --card: 222 84% 5%;
+    --card-foreground: 213 31% 91%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 222 84% 5%;
+    --popover-foreground: 213 31% 91%;
 
-    --primary: 243 85% 73%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 213 94% 68%;
+    --primary-foreground: 222 84% 5%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 213 31% 91%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 0 0% 18%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 217 32% 17%;
+    --accent-foreground: 213 31% 91%;
 
     --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 95%;
+    --destructive-foreground: 213 31% 91%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 243 85% 73%;
-    --sidebar-background: 0 0% 12%;
-    --sidebar-foreground: 0 0% 75%;
-    --sidebar-primary: 243 85% 73%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 243 85% 73%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 213 94% 68%;
+
+    --sidebar-background: 222 84% 5%;
+    --sidebar-foreground: 215 20.2% 65.1%;
+    --sidebar-primary: 213 94% 68%;
+    --sidebar-primary-foreground: 222 84% 5%;
+    --sidebar-accent: 217 32% 17%;
+    --sidebar-accent-foreground: 213 31% 91%;
+    --sidebar-border: 217 32% 17%;
+    --sidebar-ring: 213 94% 68%;
   }
 }
 
@@ -92,18 +116,93 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Mona Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   h1 {
-    @apply text-3xl font-bold;
+    @apply text-2xl font-semibold tracking-tight;
   }
   
   h2 {
-    @apply text-2xl font-semibold;
+    @apply text-xl font-semibold tracking-tight;
   }
   
   h3 {
-    @apply text-xl font-semibold;
+    @apply text-lg font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Attio-style hover effects */
+  .attio-hover {
+    @apply transition-colors duration-150 ease-in-out hover:bg-accent;
+  }
+
+  /* Attio-style buttons */
+  .attio-button-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md transition-all duration-150 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+  }
+
+  .attio-button-secondary {
+    @apply inline-flex items-center gap-2 px-3 py-2 bg-background text-foreground text-sm font-medium rounded-md border border-border transition-all duration-150 hover:bg-accent hover:border-border/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
+  }
+
+  /* Category pill styles */
+  .category-pill {
+    @apply inline-flex items-center px-2 py-1 text-xs font-medium rounded-md;
+  }
+
+  .category-pill.b2b {
+    @apply bg-blue-50 text-blue-700;
+  }
+
+  .category-pill.b2c {
+    @apply bg-pink-50 text-pink-700;
+  }
+
+  .category-pill.saas {
+    @apply bg-purple-50 text-purple-700;
+  }
+
+  .category-pill.enterprise {
+    @apply bg-blue-50 text-blue-600;
+  }
+
+  .category-pill.finance {
+    @apply bg-yellow-50 text-yellow-700;
+  }
+
+  /* Table styles */
+  .attio-table {
+    @apply w-full border-collapse;
+  }
+
+  .attio-table-header {
+    @apply sticky top-0 bg-background z-10 border-b border-border;
+  }
+
+  .attio-table-header-cell {
+    @apply px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:text-foreground transition-colors;
+  }
+
+  .attio-table-row {
+    @apply border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer;
+  }
+
+  .attio-table-cell {
+    @apply px-4 py-3 text-sm text-foreground;
+  }
+
+  /* Sidebar styles */
+  .attio-nav-item {
+    @apply flex items-center gap-3 px-3 py-2 text-sm text-sidebar-foreground rounded-md transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
+  }
+
+  .attio-nav-item.active {
+    @apply bg-sidebar-accent text-sidebar-accent-foreground;
   }
 }
