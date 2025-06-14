@@ -7,8 +7,13 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('=== GITHUB REPOS FUNCTION STARTED ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
+    console.log('Handling CORS preflight');
     return new Response("ok", { 
       status: 200, 
       headers: corsHeaders 
@@ -16,9 +21,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('=== GITHUB REPOS FUNCTION START ===');
-    console.log('Request method:', req.method);
-    
+    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -30,70 +33,92 @@ serve(async (req) => {
       }
     );
 
+    // Get auth token from request
     const authHeader = req.headers.get("Authorization");
-    console.log('Auth header present:', !!authHeader);
+    console.log('Auth header exists:', !!authHeader);
     
     if (!authHeader) {
-      throw new Error("No authorization header provided");
+      console.error('No authorization header');
+      return new Response(
+        JSON.stringify({ error: "No authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+
+    // Authenticate user
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
-    
-    console.log('User fetch result:', {
+    console.log('Auth result:', {
+      hasUser: !!user,
       userId: user?.id,
-      userError: userError?.message
+      authError: authError?.message
     });
 
-    if (!user) {
-      throw new Error("Unauthorized");
+    if (authError || !user) {
+      console.error('Authentication failed:', authError?.message);
+      return new Response(
+        JSON.stringify({ error: "Authentication failed" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    console.log('Parsing request body...');
-    const { action, repository } = await req.json();
-    console.log('Action requested:', action);
+    // Parse request body
+    const requestBody = await req.json();
+    const { action, repository } = requestBody;
+    console.log('Request action:', action);
 
-    // Get user's GitHub access token
-    console.log('Fetching user profile with GitHub token...');
-    const { data: profile, error: profileError } = await supabaseClient
+    // Get GitHub access token from profiles table
+    console.log('Fetching GitHub token for user:', user.id);
+    const { data: profiles, error: profileError } = await supabaseClient
       .from("profiles")
-      .select("github_access_token")
-      .eq("user_id", user.id)
-      .maybeSingle();
+      .select("github_access_token, github_username")
+      .eq("user_id", user.id);
 
-    console.log('Profile fetch result:', {
-      hasProfile: !!profile,
-      hasToken: !!profile?.github_access_token,
-      profileError: profileError?.message
+    console.log('Profile query result:', {
+      profilesCount: profiles?.length || 0,
+      hasToken: !!(profiles?.[0]?.github_access_token),
+      username: profiles?.[0]?.github_username,
+      error: profileError?.message
     });
 
+    const profile = profiles?.[0];
     if (!profile?.github_access_token) {
-      console.error('No GitHub access token found for user:', user.id);
-      throw new Error("GitHub not connected");
+      console.error('No GitHub access token found');
+      return new Response(
+        JSON.stringify({ error: "GitHub not connected" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     if (action === "list") {
-      console.log('Fetching repositories from GitHub API...');
-      // Get user's GitHub repositories
-      const reposResponse = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
+      console.log('Fetching repositories from GitHub...');
+      
+      const githubResponse = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
         headers: {
           Authorization: `Bearer ${profile.github_access_token}`,
-          "User-Agent": "SpecStitch/1.0",
+          "User-Agent": "SpecGraph/1.0",
+          "Accept": "application/vnd.github.v3+json"
         },
       });
 
-      console.log('GitHub API response status:', reposResponse.status);
-      
-      if (!reposResponse.ok) {
-        const errorText = await reposResponse.text();
-        console.error('GitHub API error:', errorText);
-        throw new Error(`GitHub API error: ${reposResponse.status} - ${errorText}`);
+      console.log('GitHub API status:', githubResponse.status);
+
+      if (!githubResponse.ok) {
+        const errorText = await githubResponse.text();
+        console.error('GitHub API error:', {
+          status: githubResponse.status,
+          statusText: githubResponse.statusText,
+          error: errorText
+        });
+        return new Response(
+          JSON.stringify({ error: `GitHub API error: ${githubResponse.status}` }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
-      const repositories = await reposResponse.json();
-      console.log('Repositories fetched:', {
-        count: repositories.length,
-        sampleRepo: repositories[0]?.full_name
-      });
+      const repositories = await githubResponse.json();
+      console.log('Successfully fetched', repositories.length, 'repositories');
 
       return new Response(
         JSON.stringify({ repositories }),
@@ -102,43 +127,73 @@ serve(async (req) => {
     }
 
     if (action === "connect") {
-      // Store repository connection in database
-      const { error } = await supabaseClient
+      console.log('Connecting repository:', repository?.full_name);
+      
+      if (!repository) {
+        return new Response(
+          JSON.stringify({ error: "Repository data required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Store repository in database
+      const { error: insertError } = await supabaseClient
         .from("github_repositories")
         .upsert({
           user_id: user.id,
           github_id: repository.id,
           name: repository.name,
           full_name: repository.full_name,
-          description: repository.description,
-          private: repository.private,
+          description: repository.description || null,
+          private: repository.private || false,
           html_url: repository.html_url,
           clone_url: repository.clone_url,
-          language: repository.language,
-          stars_count: repository.stargazers_count,
-          forks_count: repository.forks_count,
-          default_branch: repository.default_branch,
+          language: repository.language || null,
+          stars_count: repository.stargazers_count || 0,
+          forks_count: repository.forks_count || 0,
+          default_branch: repository.default_branch || "main",
           is_connected: true,
           connected_at: new Date().toISOString(),
         });
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Database insert error:', insertError);
+        return new Response(
+          JSON.stringify({ error: "Failed to save repository" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
+      console.log('Repository connected successfully');
       return new Response(
         JSON.stringify({ success: true }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    // Unknown action
+    console.error('Unknown action:', action);
     return new Response(
       JSON.stringify({ error: "Invalid action" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
   } catch (error) {
+    console.error('Function error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ 
+        error: error.message || "Internal server error",
+        details: error.name || "UnknownError"
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
     );
   }
 });
