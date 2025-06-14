@@ -7,16 +7,25 @@ import { useDummyData } from "@/contexts/DummyDataContext";
 import { Settings, ExternalLink, Plus, GitBranch, Github } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const coreIntegrations = [
-  {
-    id: "repos",
-    name: "Repositories",
-    description: "Manage connected repositories",
-    icon: GitBranch,
-    iconColor: "bg-blue-100 text-blue-700",
-    url: "/integrations/repos",
-    details: "View and manage your connected repositories",
-  },
+interface SubItem {
+  id: string;
+  name: string;
+  description: string;
+  url: string;
+}
+
+interface Integration {
+  id: string;
+  name: string;
+  description: string;
+  icon: any;
+  iconColor: string;
+  url: string;
+  details: string;
+  subItems?: SubItem[];
+}
+
+const coreIntegrations: Integration[] = [
   {
     id: "github",
     name: "GitHub",
@@ -25,6 +34,14 @@ const coreIntegrations = [
     iconColor: "bg-gray-100 text-gray-700",
     url: "/integrations/github",
     details: "Connect to automatically scan and catalog components",
+    subItems: [
+      {
+        id: "repos",
+        name: "Repositories",
+        description: "Manage connected repositories",
+        url: "/integrations/repos",
+      }
+    ]
   },
 ];
 
@@ -117,7 +134,20 @@ export default function Integrations() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">{integration.details}</p>
+                  <p className="text-sm text-muted-foreground mb-3">{integration.details}</p>
+                  {integration.subItems && (
+                    <div className="space-y-2">
+                      {integration.subItems.map((subItem) => (
+                        <Button key={subItem.id} asChild variant="ghost" size="sm" className="w-full justify-start">
+                          <Link to={subItem.url} className="flex items-center gap-2">
+                            <GitBranch className="w-4 h-4" />
+                            <span>{subItem.name}</span>
+                            <span className="text-xs text-muted-foreground ml-auto">{subItem.description}</span>
+                          </Link>
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
