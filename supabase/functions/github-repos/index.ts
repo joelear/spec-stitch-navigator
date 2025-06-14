@@ -58,7 +58,7 @@ serve(async (req) => {
       .from("profiles")
       .select("github_access_token")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     console.log('Profile fetch result:', {
       hasProfile: !!profile,
@@ -67,6 +67,7 @@ serve(async (req) => {
     });
 
     if (!profile?.github_access_token) {
+      console.error('No GitHub access token found for user:', user.id);
       throw new Error("GitHub not connected");
     }
 
