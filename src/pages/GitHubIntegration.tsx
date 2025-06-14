@@ -71,7 +71,7 @@ export default function GitHubIntegration() {
         throw new Error('No authenticated session found');
       }
 
-      console.log('3. Making request to github-auth function...');
+      console.log('3. Making request to github-connect function...');
       
       const requestData = { code };
       const requestHeaders = {
@@ -86,7 +86,7 @@ export default function GitHubIntegration() {
         requestBody: JSON.stringify(requestData)
       });
 
-      const { data, error } = await supabase.functions.invoke('github-auth', {
+      const { data, error } = await supabase.functions.invoke('github-connect', {
         body: requestData,
         headers: requestHeaders
       });
