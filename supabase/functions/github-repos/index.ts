@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('=== GITHUB REPOS FUNCTION STARTED ===');
+  console.log('=== GITHUB REPOS FUNCTION STARTED v2 ===');
   console.log('Method:', req.method);
   console.log('URL:', req.url);
 
