@@ -203,17 +203,32 @@ export default function GitHubIntegration() {
   const loadRepositories = async () => {
     setIsLoading(true);
     try {
-      const { data } = await supabase.functions.invoke('github-repos', {
+      console.log('=== FRONTEND: Loading repositories ===');
+      console.log('Making request to github-repos function...');
+      
+      const { data, error } = await supabase.functions.invoke('github-repos', {
         body: { action: 'list' }
       });
       
+      console.log('Response from github-repos function:', { data, error });
+      
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Failed to load repositories');
+      }
+      
       if (data?.repositories) {
+        console.log('Setting repositories:', data.repositories.length, 'repos');
         setRepositories(data.repositories);
+      } else {
+        console.log('No repositories returned in data:', data);
+        setRepositories([]);
       }
     } catch (error) {
+      console.error('Error in loadRepositories:', error);
       toast({
         title: "Error loading repositories",
-        description: "Failed to fetch GitHub repositories",
+        description: error instanceof Error ? error.message : "Failed to fetch GitHub repositories",
         variant: "destructive",
       });
     }
