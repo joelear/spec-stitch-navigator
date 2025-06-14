@@ -7,11 +7,18 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { 
+      status: 200, 
+      headers: corsHeaders 
+    });
   }
 
   try {
+    console.log('=== GITHUB REPOS FUNCTION START ===');
+    console.log('Request method:', req.method);
+    
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
@@ -23,36 +30,69 @@ serve(async (req) => {
       }
     );
 
-    const authHeader = req.headers.get("Authorization")!;
-    const { data: { user } } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
+    const authHeader = req.headers.get("Authorization");
+    console.log('Auth header present:', !!authHeader);
+    
+    if (!authHeader) {
+      throw new Error("No authorization header provided");
+    }
+    
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(authHeader.replace("Bearer ", ""));
+    
+    console.log('User fetch result:', {
+      userId: user?.id,
+      userError: userError?.message
+    });
 
     if (!user) {
       throw new Error("Unauthorized");
     }
 
+    console.log('Parsing request body...');
     const { action, repository } = await req.json();
+    console.log('Action requested:', action);
 
     // Get user's GitHub access token
-    const { data: profile } = await supabaseClient
+    console.log('Fetching user profile with GitHub token...');
+    const { data: profile, error: profileError } = await supabaseClient
       .from("profiles")
       .select("github_access_token")
       .eq("user_id", user.id)
       .single();
+
+    console.log('Profile fetch result:', {
+      hasProfile: !!profile,
+      hasToken: !!profile?.github_access_token,
+      profileError: profileError?.message
+    });
 
     if (!profile?.github_access_token) {
       throw new Error("GitHub not connected");
     }
 
     if (action === "list") {
+      console.log('Fetching repositories from GitHub API...');
       // Get user's GitHub repositories
       const reposResponse = await fetch("https://api.github.com/user/repos?sort=updated&per_page=100", {
         headers: {
           Authorization: `Bearer ${profile.github_access_token}`,
-          "User-Agent": "Supabase-Function",
+          "User-Agent": "SpecStitch/1.0",
         },
       });
 
+      console.log('GitHub API response status:', reposResponse.status);
+      
+      if (!reposResponse.ok) {
+        const errorText = await reposResponse.text();
+        console.error('GitHub API error:', errorText);
+        throw new Error(`GitHub API error: ${reposResponse.status} - ${errorText}`);
+      }
+
       const repositories = await reposResponse.json();
+      console.log('Repositories fetched:', {
+        count: repositories.length,
+        sampleRepo: repositories[0]?.full_name
+      });
 
       return new Response(
         JSON.stringify({ repositories }),
