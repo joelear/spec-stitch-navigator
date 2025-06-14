@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Github, Scan, Download, CheckCircle, ExternalLink, Link as LinkIcon, Unlink } from 'lucide-react';
@@ -409,15 +410,15 @@ export default function GitHubIntegration() {
           </Card>
 
           {/* Add Repository Modal */}
-          {showAddRepo && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Add Repository</CardTitle>
-                <CardDescription>
+          <Dialog open={showAddRepo} onOpenChange={setShowAddRepo}>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+              <DialogHeader>
+                <DialogTitle>Add Repository</DialogTitle>
+                <DialogDescription>
                   Select a repository from your GitHub account to connect
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4">
                 {isLoading ? (
                   <div className="flex items-center justify-center p-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -466,14 +467,9 @@ export default function GitHubIntegration() {
                     ))}
                   </div>
                 )}
-                <div className="mt-4">
-                  <Button variant="ghost" onClick={() => setShowAddRepo(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
     </div>
