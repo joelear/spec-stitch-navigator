@@ -206,22 +206,40 @@ export default function GitHubIntegration() {
       console.log('=== FRONTEND: Loading repositories ===');
       console.log('Making request to github-repos function...');
       
-      const { data, error } = await supabase.functions.invoke('github-repos', {
+      const response = await supabase.functions.invoke('github-repos', {
         body: { action: 'list' }
       });
       
-      console.log('Response from github-repos function:', { data, error });
+      console.log('Full response from github-repos function:', response);
+      console.log('Response data:', response.data);
+      console.log('Response error:', response.error);
       
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Failed to load repositories');
+      // Check if there's an error in the response
+      if (response.error) {
+        console.error('Supabase function error:', response.error);
+        
+        // Try to get more details about the error
+        if (response.error.message) {
+          console.error('Error message:', response.error.message);
+        }
+        if (response.error.context) {
+          console.error('Error context:', response.error.context);
+        }
+        
+        throw new Error(response.error.message || 'Failed to load repositories');
       }
       
-      if (data?.repositories) {
-        console.log('Setting repositories:', data.repositories.length, 'repos');
-        setRepositories(data.repositories);
+      // Check if the data contains an error (from the edge function)
+      if (response.data?.error) {
+        console.error('Edge function returned error:', response.data.error);
+        throw new Error(response.data.error);
+      }
+      
+      if (response.data?.repositories) {
+        console.log('Setting repositories:', response.data.repositories.length, 'repos');
+        setRepositories(response.data.repositories);
       } else {
-        console.log('No repositories returned in data:', data);
+        console.log('No repositories returned in data:', response.data);
         setRepositories([]);
       }
     } catch (error) {
