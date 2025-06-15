@@ -74,7 +74,7 @@ serve(async (req) => {
       .from("profiles")
       .select("github_access_token, github_username")
       .eq("user_id", user.id)
-      .maybeSingle();
+      .single();
 
     console.log('Profile query result:', {
       hasProfile: !!profiles,
