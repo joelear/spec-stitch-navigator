@@ -146,71 +146,81 @@ export default function GitHubIntegration() {
 
   if (!isConnected) {
     return (
-      <div className="p-6 max-w-4xl mx-auto space-y-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">GitHub Integration</h1>
-          <p className="text-muted-foreground">
-            Connect your GitHub account to browse and manage repositories
-          </p>
+      <div className="flex flex-col h-full">
+        {/* Top Bar */}
+        <div className="top-bar">
+          <h1 className="page-title">Integrations</h1>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Github className="w-5 h-5" />
-              Connect to GitHub
-            </CardTitle>
-            <CardDescription>
-              Connect your GitHub account to access your repositories
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center p-8">
-              <Github className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">GitHub Not Connected</h3>
-              <p className="text-muted-foreground mb-6">
-                Connect your GitHub account to browse and track your repositories
+        {/* Main Content */}
+        <div className="flex-1 p-6 bg-background-2">
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Connection Card */}
+            <div className="new-card">
+              <div className="flex items-center gap-3 mb-3">
+                <Github className="w-5 h-5 text-foreground-2" />
+                <h2 className="new-card-title">Connect to GitHub</h2>
+              </div>
+              <p className="new-card-text mb-6">
+                Connect your GitHub account to access your repositories
               </p>
-              <Button onClick={connectToGitHub} size="lg">
-                <Github className="w-4 h-4 mr-2" />
-                Connect GitHub
-              </Button>
+              
+              <div className="text-center p-8">
+                <Github className="w-16 h-16 text-foreground-3 mx-auto mb-4" />
+                <h3 className="new-card-title mb-2">GitHub Not Connected</h3>
+                <p className="new-card-text mb-6">
+                  Connect your GitHub account to browse and track your repositories
+                </p>
+                <button onClick={connectToGitHub} className="toolbar-button">
+                  <Github className="w-3.5 h-3.5" />
+                  Connect GitHub
+                </button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">GitHub Integration</h1>
-        <p className="text-muted-foreground">
-          Browse and manage your GitHub repositories
-        </p>
-        {profile?.github_username && (
-          <p className="text-sm text-muted-foreground mt-1">
-            Connected as {profile.github_username}
-          </p>
-        )}
+    <div className="flex flex-col h-full">
+      {/* Top Bar */}
+      <div className="top-bar">
+        <h1 className="page-title">Integrations</h1>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Github className="w-5 h-5" />
-            Your Repositories
-          </CardTitle>
-          <CardDescription>
-            Browse your GitHub repositories
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Button onClick={loadRepositories} disabled={isLoading}>
-              {isLoading ? 'Loading...' : 'Refresh Repositories'}
-            </Button>
+      {/* Toolbar */}
+      <div className="border-b border-line bg-background px-4 py-3">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={loadRepositories} 
+            disabled={isLoading}
+            className="toolbar-button"
+          >
+            <Github className="w-3.5 h-3.5" />
+            {isLoading ? 'Loading...' : 'Refresh Repositories'}
+          </button>
+          {profile?.github_username && (
+            <span className="text-sm text-foreground-3">
+              Connected as {profile.github_username}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 p-6 bg-background-2">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* GitHub Card */}
+          <div className="new-card">
+            <div className="flex items-center gap-3 mb-3">
+              <Github className="w-5 h-5 text-foreground-2" />
+              <h2 className="new-card-title">Your Repositories</h2>
+            </div>
+            <p className="new-card-text mb-4">
+              Browse your GitHub repositories
+            </p>
 
             {isLoading ? (
               <div className="flex items-center justify-center p-8">
@@ -218,39 +228,39 @@ export default function GitHubIntegration() {
               </div>
             ) : repos.length === 0 ? (
               <div className="text-center p-8">
-                <GitBranch className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No repositories found</h3>
-                <p className="text-muted-foreground mb-4">
+                <GitBranch className="w-12 h-12 text-foreground-3 mx-auto mb-4" />
+                <h3 className="new-card-title mb-2">No repositories found</h3>
+                <p className="new-card-text mb-4">
                   Click "Refresh Repositories" to load your GitHub repositories
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
                 {repos.map((repo) => (
-                  <div key={repo.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                  <div key={repo.id} className="flex items-center justify-between p-4 bg-background rounded-xl border border-line hover:bg-background-2 transition-colors">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{repo.name}</h4>
+                        <h4 className="new-card-title">{repo.name}</h4>
                         {repo.private && (
-                          <Badge variant="secondary" className="text-xs">
+                          <span className="status-badge bg-gray-100 text-gray-700">
                             Private
-                          </Badge>
+                          </span>
                         )}
                         {repo.language && (
-                          <Badge variant="outline" className="text-xs">
+                          <span className="status-badge bg-blue-100 text-blue-700">
                             {repo.language}
-                          </Badge>
+                          </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-1">
+                      <p className="text-sm text-foreground-3 mb-1">
                         {repo.full_name}
                       </p>
                       {repo.description && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="new-card-text">
                           {repo.description}
                         </p>
                       )}
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-4 mt-2 text-xs text-foreground-3">
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3" />
                           {repo.stargazers_count}
@@ -261,22 +271,21 @@ export default function GitHubIntegration() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
+                      <button
                         onClick={() => window.open(repo.html_url, '_blank')}
+                        className="toolbar-button"
                       >
-                        <ExternalLink className="w-4 h-4 mr-2" />
+                        <ExternalLink className="w-3.5 h-3.5" />
                         View
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

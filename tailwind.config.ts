@@ -70,7 +70,12 @@ export default {
 					warning: 'hsl(38 92% 50%)',
 					error: 'hsl(0 84% 60%)',
 					info: 'hsl(217 91% 60%)'
-				}
+				},
+				'background-2': 'hsl(var(--background-2))',
+				'background-3': 'hsl(var(--background-3))',
+				'foreground-2': 'hsl(var(--foreground-2))',
+				'foreground-3': 'hsl(var(--foreground-3))',
+				'line': 'hsl(var(--line))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

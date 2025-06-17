@@ -6,67 +6,66 @@
 
 @layer base {
   :root {
-    /* Core neutral colors - Attio style */
-    --background: 0 0% 100%;
-    --foreground: 217 19% 14%;
+    /* New color scheme */
+    --background: 0 0% 100%; /* #ffffff */
+    --background-2: 218 5% 98%; /* #FBFBFB */
+    --background-3: 218 5% 98%; /* #FBFBFB */
+    --foreground: 215 15% 16%; /* #232529 */
+    --foreground-2: 215 8% 37%; /* #5C5E63 */
+    --foreground-3: 215 6% 47%; /* #75777C */
+    --line: 220 8% 93%; /* #eeeff1 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 217 19% 14%;
+    --card: 218 5% 98%; /* background-2 */
+    --card-foreground: 215 15% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 217 19% 14%;
+    --popover-foreground: 215 15% 16%;
 
-    /* Primary blue - Attio accent */
+    /* Primary - keeping existing blue */
     --primary: 213 94% 68%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary grays */
-    --secondary: 210 20% 98%;
-    --secondary-foreground: 217 19% 14%;
+    --secondary: 218 5% 98%;
+    --secondary-foreground: 215 15% 16%;
 
-    --muted: 210 20% 98%;
-    --muted-foreground: 215 13.8% 34.1%;
+    --muted: 218 5% 98%;
+    --muted-foreground: 215 8% 37%;
 
-    --accent: 210 40% 98%;
-    --accent-foreground: 217 19% 14%;
+    --accent: 218 5% 98%;
+    --accent-foreground: 215 15% 16%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --border: 220 8% 93%;
+    --input: 220 8% 93%;
     --ring: 213 94% 68%;
 
     --radius: 0.375rem;
 
     /* Sidebar specific colors */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 13.8% 34.1%;
+    --sidebar-background: 218 5% 98%; /* background-2 */
+    --sidebar-foreground: 215 8% 37%; /* foreground-2 */
     --sidebar-primary: 213 94% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 98%;
-    --sidebar-accent-foreground: 217 19% 14%;
-    --sidebar-border: 220 13% 91%;
+    --sidebar-accent: 218 5% 98%;
+    --sidebar-accent-foreground: 215 15% 16%;
+    --sidebar-border: 220 8% 93%;
     --sidebar-ring: 213 94% 68%;
 
     /* Table specific colors */
     --table-background: 0 0% 100%;
     --table-header-background: 0 0% 100%;
-    --table-border: 220 13% 91%;
-    --table-hover: 210 20% 98%;
+    --table-border: 220 8% 93%;
+    --table-hover: 218 5% 98%;
 
-    /* Category pill colors */
-    --category-b2b: 219 95% 96%;
-    --category-b2b-foreground: 224 76% 48%;
-    --category-b2c: 326 78% 95%;
-    --category-b2c-foreground: 322 81% 43%;
-    --category-saas: 250 95% 96%;
-    --category-saas-foreground: 253 91% 64%;
-    --category-enterprise: 213 100% 96%;
-    --category-enterprise-foreground: 212 100% 47%;
-    --category-finance: 45 93% 87%;
-    --category-finance-foreground: 32 95% 44%;
+    /* Status colors */
+    --status-planning: 213 94% 68%;
+    --status-live: 142 71% 45%;
+    --status-warning: 38 92% 50%;
+    --status-error: 0 84% 60%;
   }
 
   .dark {
@@ -197,12 +196,72 @@
     @apply px-4 py-3 text-sm text-foreground;
   }
 
-  /* Sidebar styles */
-  .attio-nav-item {
-    @apply flex items-center gap-3 px-3 py-2 text-sm text-sidebar-foreground rounded-md transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground;
+  /* New design system components */
+  .sidebar-header {
+    @apply h-12 flex items-center justify-between px-3 border-r border-line bg-sidebar-background;
   }
 
-  .attio-nav-item.active {
-    @apply bg-sidebar-accent text-sidebar-accent-foreground;
+  .sidebar-account {
+    @apply flex items-center gap-2;
+  }
+
+  .sidebar-avatar {
+    @apply w-6 h-6 rounded-full bg-primary;
+  }
+
+  .sidebar-account-name {
+    @apply text-sm font-semibold text-foreground;
+  }
+
+  .sidebar-chevron {
+    @apply w-3.5 h-3.5 text-foreground-2;
+  }
+
+  .sidebar-nav-item {
+    @apply flex items-center gap-3 px-4 py-2 text-sm font-medium text-foreground-2 hover:text-foreground transition-colors;
+  }
+
+  .sidebar-nav-item.active {
+    @apply text-foreground;
+  }
+
+  .sidebar-nav-icon {
+    @apply w-3.5 h-3.5 ml-0;
+  }
+
+  .top-bar {
+    @apply h-12 border-b border-line bg-background flex items-center px-4;
+  }
+
+  .page-title {
+    @apply text-sm font-medium text-foreground-2;
+  }
+
+  .toolbar-button {
+    @apply inline-flex items-center gap-2 px-1.5 py-2 text-sm font-medium text-foreground-2 hover:text-foreground transition-colors rounded-lg;
+  }
+
+  .new-card {
+    @apply bg-card rounded-2xl p-4 border border-line;
+  }
+
+  .new-card-title {
+    @apply text-sm font-semibold text-foreground;
+  }
+
+  .new-card-text {
+    @apply text-sm text-foreground-2;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center px-1.5 py-0.5 text-xs font-medium rounded-md;
+  }
+
+  .status-badge.planning {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .status-badge.live {
+    @apply bg-green-100 text-green-700;
   }
 }
