@@ -1,0 +1,22 @@
+features:
+- name: App component rendering
+  scenarios:
+  - given: App component is rendered
+    when: Component mounts
+    then: Learn react link is displayed in the document
+  source_file: src/App.test.js
+  source_path: /workspace/app/src/App.test.js
+- name: Todo App Animation Flow
+  scenarios:
+  - given: User visits the todo application
+    when: The page loads
+    then: The title animates from above with spring motion
+    and_then: The todo components animate up from below
+  - given: User hovers over the app title
+    when: Mouse enters the title area
+    then: Title scales up to 110% size
+  - given: Todo components are rendered
+    when: Animation completes
+    then: User can interact with todo input and display
+  source_file: src/App.js
+  source_path: /workspace/app/src/App.js

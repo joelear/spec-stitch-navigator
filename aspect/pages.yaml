@@ -1,0 +1,39 @@
+pages:
+- id: app
+  title: Todo App
+  route: /
+  description: 'Main todo application page with animated header and todo management
+    interface. Features spring animations for initial load and hover effects on the
+    title.
+
+    '
+  components:
+  - Todos
+  - DisplayTodos
+  source_file: src/App.js
+  source_path: /workspace/app/src/App.js
+- id: todo_app
+  title: Todo App
+  route: /
+  description: 'A todo application with a purple gradient background featuring a centered
+    input form at the top, filter buttons, and a card-based todo list display with
+    edit/complete/delete functionality.
+
+    '
+  ui_elements:
+  - todo_input
+  - add_btn
+  - filter_buttons
+  - todo_card
+  - todo_textarea
+  - edit_button
+  - complete_button
+  - delete_button
+  - completed_badge
+  components:
+  - TodoInput
+  - TodoFilters
+  - TodoList
+  - TodoCard
+  source_file: src/App.css
+  source_path: /workspace/app/src/App.css
