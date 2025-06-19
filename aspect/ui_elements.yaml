@@ -1,0 +1,55 @@
+ui_elements:
+- id: learn_react_link
+  label: Learn React
+  description: Link element that displays "Learn React" text, likely for navigation
+    to React documentation or learning resources
+  source_file: src/App.test.js
+  source_path: /workspace/app/src/App.test.js
+- id: app_title
+  label: Todo App
+  description: Animated main heading with spring animation and hover scale effect
+  source_file: src/App.js
+  source_path: /workspace/app/src/App.js
+- id: main_container
+  label: App Container
+  description: Root div container with App className for the entire application
+  source_file: src/App.js
+  source_path: /workspace/app/src/App.js
+- id: content_wrapper
+  label: Content Wrapper
+  description: Animated motion div that wraps todo components with spring entrance
+    animation
+  source_file: src/App.js
+  source_path: /workspace/app/src/App.js
+- id: todo_input
+  label: Todo Input
+  description: Text input field for entering new todo items with focus styling
+  source_file: src/styles.css
+  source_path: /workspace/app/src/styles.css
+- id: add_button
+  label: Add Button
+  description: Circular button with plus icon for adding new todos
+  source_file: src/styles.css
+  source_path: /workspace/app/src/styles.css
+- id: filter_button
+  label: Filter Button
+  description: Rounded filter buttons for displaying different todo categories
+  source_file: src/styles.css
+  source_path: /workspace/app/src/styles.css
+- id: todo_textarea
+  label: Todo Textarea
+  description: Editable textarea within todo cards for displaying and editing todo
+    text
+  source_file: src/styles.css
+  source_path: /workspace/app/src/styles.css
+- id: card_action_button
+  label: Card Action Button
+  description: Small transparent buttons for edit, complete, and delete actions on
+    todo cards
+  source_file: src/styles.css
+  source_path: /workspace/app/src/styles.css
+- id: completed_badge
+  label: Completed Badge
+  description: Small rounded badge indicating completed status on todo cards
+  source_file: src/styles.css
+  source_path: /workspace/app/src/styles.css
