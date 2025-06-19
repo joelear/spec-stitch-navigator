@@ -1,0 +1,47 @@
+components:
+- id: App
+  description: Main application component with animated header and todo functionality
+  components:
+  - Todos
+  - DisplayTodos
+  source_file: src/App.js
+  source_path: /workspace/app/src/App.js
+- id: AppRoot
+  description: Root application component wrapped with Redux Provider for state management
+  ui_elements: []
+  components:
+  - App
+  source_file: src/index.js
+  source_path: /workspace/app/src/index.js
+- id: TodoCard
+  description: Individual todo item card with textarea for content and action buttons
+    for edit/complete/delete
+  ui_elements:
+  - todo_textarea
+  - edit_button
+  - complete_button
+  - delete_button
+  - completed_badge
+  source_file: src/components/TodoCard.css
+  source_path: /workspace/app/src/components/TodoCard.css
+- id: TodoInput
+  description: Input form component for adding new todos with text input and add button
+  ui_elements:
+  - todo_input
+  - add_btn
+  source_file: src/components/TodoInput.css
+  source_path: /workspace/app/src/components/TodoInput.css
+- id: TodoFilters
+  description: Filter buttons component for displaying different todo states (all,
+    active, completed)
+  ui_elements:
+  - filter_buttons
+  source_file: src/components/TodoFilters.css
+  source_path: /workspace/app/src/components/TodoFilters.css
+- id: TodoList
+  description: Container component that displays a grid/list of todo cards with responsive
+    layout
+  ui_elements:
+  - todo_grid
+  source_file: src/components/TodoList.css
+  source_path: /workspace/app/src/components/TodoList.css
