@@ -1,0 +1,33 @@
+components:
+  - id: AppContent
+    description: >-
+      Main application content wrapper that handles routing and layout based on
+      authentication state
+    ui_elements:
+      - loading_spinner
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: App
+    description: Root application component that sets up providers and global UI elements
+    components:
+      - AppContent
+      - Toaster
+      - Sonner
+      - TooltipProvider
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: ProtectedRoute
+    description: Route wrapper that handles authentication protection
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: AppSidebar
+    description: Main application sidebar navigation component
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: AppHeader
+    description: Main application header component
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
