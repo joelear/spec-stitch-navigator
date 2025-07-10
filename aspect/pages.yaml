@@ -1,0 +1,115 @@
+pages:
+  - id: home
+    title: 'Spec Graph - Code, Design & Product Specs'
+    description: >-
+      Landing page that connects code, design files, and product specs into one
+      navigable graph
+    meta:
+      description: >-
+        Connect your code, design files, and product specs into one navigable
+        graph
+      author: Spec Graph
+      og_title: 24cb980d-532d-4175-a2e8-683a14e81d06
+      og_description: Lovable Generated Project
+      og_type: website
+      og_image: 'https://lovable.dev/opengraph-image-p98pqg.png'
+      twitter_card: summary_large_image
+      twitter_site: '@lovable_dev'
+    source_file: index.html
+    source_path: /workspace/app/index.html
+  - id: integrations
+    title: Integrations
+    route: /integrations
+    description: Main integrations overview page
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: components_list
+    title: Components
+    route: /components
+    description: List view of all components
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: component_detail
+    title: Component Detail
+    route: '/components/:id'
+    description: Detailed view of a specific component
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: features_list
+    title: Features
+    route: /features
+    description: List view of all features
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: feature_detail
+    title: Feature Detail
+    route: '/features/:id'
+    description: Detailed view of a specific feature
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: changes
+    title: Changes
+    route: /changes
+    description: View of system changes
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: repos
+    title: Repositories
+    route: /integrations/repos
+    description: List of connected repositories
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: repo_dashboard
+    title: Repository Dashboard
+    route: '/integrations/repos/:id'
+    description: Dashboard for a specific repository
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: github_integration
+    title: GitHub Integration
+    route: /integrations/github
+    description: GitHub integration configuration page
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: auth
+    title: Authentication
+    route: /auth
+    description: Authentication page for login/signup
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: not_found
+    title: Not Found
+    route: '*'
+    description: 404 error page
+    components:
+      - AppSidebar
+      - AppHeader
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx

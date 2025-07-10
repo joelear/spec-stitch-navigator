@@ -1,0 +1,68 @@
+ui_elements:
+  - id: meta_viewport
+    description: Viewport meta tag for responsive design
+    source_file: index.html
+    source_path: /workspace/app/index.html
+  - id: meta_description
+    description: SEO description meta tag
+    source_file: index.html
+    source_path: /workspace/app/index.html
+  - id: meta_opengraph
+    description: OpenGraph meta tags for social sharing
+    source_file: index.html
+    source_path: /workspace/app/index.html
+  - id: meta_twitter
+    description: Twitter card meta tags for social sharing
+    source_file: index.html
+    source_path: /workspace/app/index.html
+  - id: font_mona_sans
+    description: Mona Sans font family import from Google Fonts
+    source_file: index.html
+    source_path: /workspace/app/index.html
+  - id: root_container
+    description: Main root div container for React app mounting
+    source_file: index.html
+    source_path: /workspace/app/index.html
+  - id: logo
+    description: Animated logo element with hover effects and spin animation
+    styles:
+      height: 6em
+      padding: 1.5em
+      animation: logo-spin 20s linear infinite
+    source_file: src/App.css
+    source_path: /workspace/app/src/App.css
+  - id: card
+    description: Simple card container with padding
+    styles:
+      padding: 2em
+    source_file: src/App.css
+    source_path: /workspace/app/src/App.css
+  - id: read_the_docs
+    description: Text element with muted gray color
+    styles:
+      color: '#888'
+    source_file: src/App.css
+    source_path: /workspace/app/src/App.css
+  - id: loading_spinner
+    description: Animated loading spinner shown during auth state check
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+    styles:
+      - animate-spin
+      - rounded-full
+      - h-8
+      - w-8
+      - border-b-2
+      - border-primary
+  - id: toaster
+    description: Toast notification component for displaying alerts
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: sonner
+    description: Alternative toast notification component
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - id: tooltip_provider
+    description: Provider component for tooltip functionality
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx

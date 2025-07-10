@@ -1,0 +1,35 @@
+features:
+  - name: Authentication routing
+    scenarios:
+      - given: User is not authenticated
+        when: They visit any protected route
+        then: They are redirected to /auth
+      - given: User is authenticated
+        when: They visit /auth
+        then: They are redirected to root (/)
+      - given: Auth state is loading
+        when: User visits the application
+        then: Loading spinner is displayed
+        and_then: Routes are not rendered until auth check completes
+      - given: User is authenticated
+        when: They visit a protected route
+        then: The protected route content is rendered
+        and_then: Sidebar and header are displayed
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
+  - name: Route protection
+    scenarios:
+      - given: User is not authenticated
+        when: They attempt to access /components
+        then: They are redirected to /auth
+      - given: User is not authenticated
+        when: They attempt to access /features
+        then: They are redirected to /auth
+      - given: User is not authenticated
+        when: They attempt to access /changes
+        then: They are redirected to /auth
+      - given: User is not authenticated
+        when: They attempt to access /integrations
+        then: They are redirected to /auth
+    source_file: src/App.tsx
+    source_path: /workspace/app/src/App.tsx
